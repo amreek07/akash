@@ -20,13 +20,27 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false,
     },
     role: {
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    otp: {
+        type: String,
+        select: false,
+    },
+    otpExpires: {
+        type: Date,
+        select: false,
+    },
+    refreshToken: {
+        type: String,
+        select: false,
     }
+
 }, { timestamps: true});
 
 userSchema.index({ email: 1 }, { unique: true });
