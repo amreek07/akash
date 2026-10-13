@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { seedFooter, seedGallery } from '@/constants/content'
+import { seedAbout, seedFooter, seedGallery, seedGeneral } from '@/constants/content'
 
 const STORAGE_KEY = 'admin.content.preview'
 
@@ -9,7 +9,12 @@ function loadPreview() {
     if (!raw) return null
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed.gallery) || !parsed.footer) return null
-    return parsed
+    return {
+      gallery: parsed.gallery,
+      footer: parsed.footer,
+      general: parsed.general || seedGeneral,
+      about: parsed.about || seedAbout,
+    }
   } catch {
     return null
   }
@@ -19,7 +24,12 @@ export function saveContentPreview(state) {
   try {
     sessionStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ gallery: state.gallery, footer: state.footer }),
+      JSON.stringify({
+        gallery: state.gallery,
+        footer: state.footer,
+        general: state.general,
+        about: state.about,
+      }),
     )
   } catch {
     // Large image previews stay in memory for this visit.
@@ -31,6 +41,8 @@ const contentSlice = createSlice({
   initialState: loadPreview() || {
     gallery: seedGallery,
     footer: seedFooter,
+    general: seedGeneral,
+    about: seedAbout,
   },
   reducers: {
     addGalleryImage(state, action) {
@@ -46,8 +58,15 @@ const contentSlice = createSlice({
     saveFooter(state, action) {
       state.footer = action.payload
     },
+    saveGeneral(state, action) {
+      state.general = action.payload
+    },
+    saveAbout(state, action) {
+      state.about = action.payload
+    },
   },
 })
 
-export const { addGalleryImage, updateGalleryImage, deleteGalleryImage, saveFooter } = contentSlice.actions
+export const { addGalleryImage, updateGalleryImage, deleteGalleryImage, saveFooter, saveGeneral, saveAbout } =
+  contentSlice.actions
 export default contentSlice.reducer

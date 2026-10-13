@@ -11,7 +11,7 @@ export default function Dashboard() {
       <section className="overflow-hidden rounded-2xl bg-shade text-white">
         <div className="grid gap-8 p-6 md:grid-cols-[1.4fr_0.8fr] md:p-8">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Admin console</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Coding Hubs Institute</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight">Welcome back, {firstName(name)}</h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-white/75">
               This session belongs to an administrator. The sidebar is the way through the panel, and sign-out ends it on this browser.

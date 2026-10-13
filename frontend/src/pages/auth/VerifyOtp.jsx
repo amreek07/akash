@@ -61,7 +61,7 @@ export default function VerifyOtp() {
       description={
         isReset
           ? `Enter the code sent to ${recovery.email} to continue resetting the password.`
-          : `Enter the code sent to ${recovery.email} to open the administrator console.`
+          : `Enter the code sent to ${recovery.email} to open Coding Hubs Institute.`
       }
       footer={
         <Link to={isReset ? paths.forgetPassword : paths.login} className="font-semibold text-logo hover:underline">
@@ -88,7 +88,7 @@ export default function VerifyOtp() {
           {otpError ? <p className="mt-2 text-xs text-red-600">{otpError}</p> : null}
         </div>
         <Button type="submit" loading={loading} className="w-full">
-          {isReset ? 'Verify and continue' : 'Enter console'}
+          {isReset ? 'Verify and continue' : 'Open Coding Hubs Institute'}
         </Button>
         <Button
           type="button"

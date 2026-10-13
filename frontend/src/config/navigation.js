@@ -23,7 +23,7 @@ export const adminNavigation = [
     label: 'Content',
     to: '/content',
     icon: 'content',
-    description: 'Gallery and footer',
+    description: 'Site content',
   },
   {
     label: 'Profile',

@@ -28,6 +28,7 @@ function RowActions({ onRemove, label }) {
 export default function FooterContent() {
   const dispatch = useAppDispatch()
   const stored = useAppSelector((state) => state.content.footer)
+  const logo = useAppSelector((state) => state.content.general?.logo || '')
   const [footer, setFooter] = useState(() => cloneFooter(stored))
   const [errors, setErrors] = useState({})
   const [saved, setSaved] = useState(false)
@@ -92,7 +93,7 @@ export default function FooterContent() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Client panel</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Coding Hubs Institute</p>
       <h2 className="mt-1 text-2xl font-semibold tracking-tight text-heading">Content</h2>
       <p className="mt-1 max-w-2xl text-sm text-muted">
         Edit the footer shown on the client site. The preview below follows the institute footer layout.
@@ -271,7 +272,7 @@ export default function FooterContent() {
 
       <div className="mt-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Footer preview</p>
-        <FooterPreview footer={footer} />
+        <FooterPreview footer={footer} logo={logo} />
       </div>
     </div>
   )

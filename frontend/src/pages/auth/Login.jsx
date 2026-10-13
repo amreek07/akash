@@ -58,7 +58,7 @@ export default function Login() {
     <AuthLayout
       eyebrow="Administrator"
       title="Sign in"
-      description="Enter any email and password to open the console and review the page designs."
+      description="Enter any email and password to open Coding Hubs Institute and review the page designs."
       footer={
         <>
           Forgot the password?{' '}

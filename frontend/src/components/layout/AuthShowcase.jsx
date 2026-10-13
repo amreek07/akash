@@ -3,7 +3,7 @@ import Logo from '@/components/common/Logo'
 const steps = [
   { title: 'Credentials', copy: 'Sign in with the administrator email and password.' },
   { title: 'One-time code', copy: 'Confirm the 6-digit code sent to that inbox.' },
-  { title: 'Console', copy: 'Open the panel, or set a new password if you are locked out.' },
+  { title: 'Coding Hubs Institute', copy: 'Open the institute panel, or set a new password if you are locked out.' },
 ]
 
 export default function AuthShowcase() {
@@ -26,7 +26,7 @@ export default function AuthShowcase() {
         <div className="max-w-md">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Administrator only</p>
           <h2 className="mt-3 text-4xl font-semibold leading-tight tracking-tight">
-            One console for the people who run it.
+            Coding Hubs Institute, from one panel.
           </h2>
           <p className="mt-4 text-sm leading-6 text-white/75">
             This panel is reserved for administrator accounts. Everyone else stops at the sign-in screen.

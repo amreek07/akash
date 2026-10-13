@@ -15,6 +15,8 @@ import EditProfile from '@/pages/profile/EditProfile'
 import ChangePassword from '@/pages/profile/ChangePassword'
 import ResponseList from '@/pages/responses/ResponseList'
 import ResponseDetails from '@/pages/responses/ResponseDetails'
+import GeneralContent from '@/pages/content/GeneralContent'
+import AboutContent from '@/pages/content/AboutContent'
 import GalleryList from '@/pages/content/GalleryList'
 import GalleryFormPage from '@/pages/content/GalleryFormPage'
 import FooterContent from '@/pages/content/FooterContent'
@@ -61,7 +63,9 @@ export default function AppRoutes() {
           <Route path="/responses" element={<Navigate to={paths.responses} replace />} />
           <Route path="/responses/:kind" element={<ResponseList />} />
           <Route path="/responses/:kind/:id" element={<ResponseDetails />} />
-          <Route path="/content" element={<Navigate to={paths.contentGallery} replace />} />
+          <Route path="/content" element={<Navigate to={paths.contentGeneral} replace />} />
+          <Route path={paths.contentGeneral} element={<GeneralContent />} />
+          <Route path={paths.contentAbout} element={<AboutContent />} />
           <Route path={paths.contentGallery} element={<GalleryList />} />
           <Route path={paths.galleryNew} element={<GalleryFormPage />} />
           <Route path="/content/gallery/:id/edit" element={<GalleryFormPage />} />

@@ -16,7 +16,7 @@ export default function GalleryList() {
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Client panel</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Coding Hubs Institute</p>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight text-heading">Content</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted">
             Gallery images and the institute footer shown on the client site.
