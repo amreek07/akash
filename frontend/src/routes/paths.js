@@ -15,6 +15,11 @@ export const paths = {
   responses: '/responses/registrations',
   responseTab: (kind) => `/responses/${kind}`,
   responseDetails: (kind, id) => `/responses/${kind}/${id}`,
+  content: '/content/gallery',
+  contentGallery: '/content/gallery',
+  contentFooter: '/content/footer',
+  galleryNew: '/content/gallery/new',
+  galleryEdit: (id) => `/content/gallery/${id}/edit`,
 }
 
 export const pageTitles = {
@@ -29,6 +34,9 @@ export const pageTitles = {
   [paths.changePassword]: 'Change password',
   [paths.responses]: 'Responses',
   '/responses/enquiries': 'Responses',
+  [paths.contentGallery]: 'Gallery',
+  [paths.galleryNew]: 'Add image',
+  [paths.contentFooter]: 'Footer',
 }
 
 export function resolvePageTitle(pathname) {
@@ -37,5 +45,6 @@ export function resolvePageTitle(pathname) {
   if (/^\/courses\/[^/]+\/edit$/.test(pathname)) return 'Edit course'
   if (/^\/courses\/[^/]+$/.test(pathname)) return 'Course details'
   if (/^\/responses\/(registrations|enquiries)\/[^/]+$/.test(pathname)) return 'Response details'
+  if (/^\/content\/gallery\/[^/]+\/edit$/.test(pathname)) return 'Edit image'
   return 'Admin'
 }

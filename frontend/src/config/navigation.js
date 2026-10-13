@@ -20,6 +20,12 @@ export const adminNavigation = [
     description: 'Registrations and enquiries',
   },
   {
+    label: 'Content',
+    to: '/content',
+    icon: 'content',
+    description: 'Gallery and footer',
+  },
+  {
     label: 'Profile',
     to: paths.profile,
     icon: 'user',

@@ -52,6 +52,13 @@ const icons = {
       <path d="M4 13h4.5l1.5 2.5h4L15.5 13H20" />
     </>
   ),
+  content: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="8.5" cy="10" r="1.4" />
+      <path d="m21 15-5-4-9 7" />
+    </>
+  ),
   eye: (
     <>
       <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
