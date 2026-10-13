@@ -1,0 +1,16 @@
+import { paths } from '@/routes/paths'
+
+export const adminNavigation = [
+  {
+    label: 'Dashboard',
+    to: paths.dashboard,
+    icon: 'dashboard',
+    description: 'Administrator overview',
+  },
+  {
+    label: 'Courses',
+    to: paths.courses,
+    icon: 'courses',
+    description: 'Course catalogue',
+  },
+]

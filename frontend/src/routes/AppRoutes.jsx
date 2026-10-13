@@ -1,0 +1,56 @@
+import { useEffect } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { appConfig } from '@/config/appConfig'
+import AdminLayout from '@/components/layout/AdminLayout'
+import Login from '@/pages/auth/Login'
+import ForgetPassword from '@/pages/auth/ForgetPassword'
+import VerifyOtp from '@/pages/auth/VerifyOtp'
+import ResetPassword from '@/pages/auth/ResetPassword'
+import Dashboard from '@/pages/dashboard/Dashboard'
+import CourseList from '@/pages/courses/CourseList'
+import CourseFormPage from '@/pages/courses/CourseFormPage'
+import CourseDetails from '@/pages/courses/CourseDetails'
+import NotFound from '@/pages/NotFound'
+import { paths, resolvePageTitle } from '@/routes/paths'
+import PrivateRoute from '@/routes/PrivateRoute'
+import PublicRoute from '@/routes/PublicRoute'
+import { useAppSelector } from '@/store/hooks'
+
+function RootRedirect() {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
+  return <Navigate to={isAuthenticated ? paths.dashboard : paths.login} replace />
+}
+
+export default function AppRoutes() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const pageTitle = resolvePageTitle(pathname)
+    document.title = `${pageTitle} · ${appConfig.appName}`
+  }, [pathname])
+
+  return (
+    <Routes>
+      <Route path={paths.root} element={<RootRedirect />} />
+
+      <Route element={<PublicRoute />}>
+        <Route path={paths.login} element={<Login />} />
+        <Route path={paths.forgetPassword} element={<ForgetPassword />} />
+        <Route path={paths.verifyOtp} element={<VerifyOtp />} />
+        <Route path={paths.resetPassword} element={<ResetPassword />} />
+      </Route>
+
+      <Route element={<PrivateRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route path={paths.dashboard} element={<Dashboard />} />
+          <Route path={paths.courses} element={<CourseList />} />
+          <Route path={paths.courseNew} element={<CourseFormPage />} />
+          <Route path="/courses/:id/edit" element={<CourseFormPage />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  )
+}
