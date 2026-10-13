@@ -12,6 +12,9 @@ export const paths = {
   profile: '/profile',
   profileEdit: '/profile/edit',
   changePassword: '/profile/change-password',
+  responses: '/responses/registrations',
+  responseTab: (kind) => `/responses/${kind}`,
+  responseDetails: (kind, id) => `/responses/${kind}/${id}`,
 }
 
 export const pageTitles = {
@@ -24,6 +27,8 @@ export const pageTitles = {
   [paths.profile]: 'Profile',
   [paths.profileEdit]: 'Edit profile',
   [paths.changePassword]: 'Change password',
+  [paths.responses]: 'Responses',
+  '/responses/enquiries': 'Responses',
 }
 
 export function resolvePageTitle(pathname) {
@@ -31,5 +36,6 @@ export function resolvePageTitle(pathname) {
   if (pathname === paths.courseNew) return 'Add course'
   if (/^\/courses\/[^/]+\/edit$/.test(pathname)) return 'Edit course'
   if (/^\/courses\/[^/]+$/.test(pathname)) return 'Course details'
+  if (/^\/responses\/(registrations|enquiries)\/[^/]+$/.test(pathname)) return 'Response details'
   return 'Admin'
 }

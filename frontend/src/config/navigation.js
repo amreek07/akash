@@ -14,6 +14,12 @@ export const adminNavigation = [
     description: 'Course catalogue',
   },
   {
+    label: 'Responses',
+    to: '/responses',
+    icon: 'inbox',
+    description: 'Registrations and enquiries',
+  },
+  {
     label: 'Profile',
     to: paths.profile,
     icon: 'user',
