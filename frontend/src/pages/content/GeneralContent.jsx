@@ -4,6 +4,7 @@ import Button from '@/components/common/Button'
 import TextField from '@/components/common/TextField'
 import ContentTabs from '@/components/content/ContentTabs'
 import ImageField from '@/components/content/ImageField'
+import Logo from '@/components/common/Logo'
 import { instituteName, seedGeneral } from '@/constants/content'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { saveGeneral } from '@/store/slices/contentSlice'
@@ -70,16 +71,7 @@ export default function GeneralContent() {
       <div className="mt-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">General preview</p>
         <div className="flex items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4 shadow-[inset_0_0_0_1px_#e4e8ef]">
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-logo text-white">
-              {general.logo ? (
-                <img src={general.logo} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-semibold">CH</span>
-              )}
-            </span>
-            <p className="text-sm font-semibold text-heading">{instituteName}</p>
-          </div>
+          <Logo image={general.logo} />
           <p className="text-sm font-semibold text-logo">{general.admissionYear || 'Admission year'}</p>
         </div>
       </div>

@@ -1,19 +1,4 @@
-function Mark({ logo }) {
-  return (
-    <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-logo text-white">
-      {logo ? (
-        <img src={logo} alt="" className="h-full w-full object-cover" />
-      ) : (
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M12 3 3 8.2v1.2h18V8.2L12 3Zm-6.2 8.2V18H7.2v-6.8H5.8Zm4.2 0V18h1.4v-6.8H10Zm4.6 0V18h1.4v-6.8h-1.4Zm4.6 0V18H20v-6.8h-1.4ZM4 19.2h16V21H4v-1.8Z"
-          />
-        </svg>
-      )}
-    </span>
-  )
-}
+import Logo from '@/components/common/Logo'
 
 function Pin() {
   return (
@@ -56,10 +41,7 @@ export default function FooterPreview({ footer, logo }) {
     <footer className="overflow-hidden rounded-2xl bg-ink text-white">
       <div className="grid gap-10 px-6 py-8 sm:px-8 lg:grid-cols-4">
         <div>
-          <div className="flex items-center gap-3">
-            <Mark logo={logo} />
-            <p className="text-base font-semibold">{footer.instituteName || 'Institute name'}</p>
-          </div>
+          <Logo tone="light" name={footer.instituteName || 'Institute name'} image={logo} />
           <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">{footer.tagline || 'Tagline'}</p>
         </div>
 
