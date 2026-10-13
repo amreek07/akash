@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { authApi } from '@/api/authApi'
 import { tokenStorage } from '@/utils/tokenStorage'
 import { emptyRecovery, recoveryStorage } from '@/utils/recoveryStorage'
-import { appConfig } from '@/config/appConfig'
 import { getErrorMessage } from '@/utils/apiError'
 
 const session = tokenStorage.getSession()
@@ -13,6 +12,8 @@ function toAdmin(user = {}) {
     fullName: user.fullName || user.name || 'Administrator',
     email: user.email || '',
     role: user.role || '',
+    countryCode: user.countryCode || '',
+    phone: user.phone || '',
   }
 }
 
@@ -27,6 +28,8 @@ export const previewLogin = createAsyncThunk('auth/previewLogin', async ({ email
     fullName: 'Administrator',
     email: email.trim(),
     role: 'admin',
+    countryCode: '+91',
+    phone: '',
   }
   const accessToken = 'preview-access-token'
   const refreshToken = 'preview-refresh-token'
@@ -196,6 +199,9 @@ const authSlice = createSlice({
       state.status = 'idle'
       state.error = null
     },
+    profileUpdated(state, action) {
+      state.user = action.payload
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -276,5 +282,23 @@ function rejected(state, action) {
   state.error = action.payload || 'Request failed'
 }
 
-export const { clearAuthFeedback, clearRecovery, updateTokens, clearSession } = authSlice.actions
+export const { clearAuthFeedback, clearRecovery, updateTokens, clearSession, profileUpdated } = authSlice.actions
+
+export function saveProfile(profile) {
+  return (dispatch, getState) => {
+    const { user, accessToken, refreshToken } = getState().auth
+    const nextUser = {
+      ...user,
+      fullName: profile.fullName,
+      email: profile.email,
+      countryCode: profile.countryCode,
+      phone: profile.phone,
+    }
+    if (accessToken) {
+      tokenStorage.setSession({ accessToken, refreshToken, user: nextUser })
+    }
+    dispatch(profileUpdated(nextUser))
+  }
+}
+
 export default authSlice.reducer

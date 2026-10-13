@@ -9,6 +9,9 @@ export const paths = {
   courseNew: '/courses/new',
   courseDetails: (id) => `/courses/${id}`,
   courseEdit: (id) => `/courses/${id}/edit`,
+  profile: '/profile',
+  profileEdit: '/profile/edit',
+  changePassword: '/profile/change-password',
 }
 
 export const pageTitles = {
@@ -18,6 +21,9 @@ export const pageTitles = {
   [paths.resetPassword]: 'Reset password',
   [paths.dashboard]: 'Dashboard',
   [paths.courses]: 'Courses',
+  [paths.profile]: 'Profile',
+  [paths.profileEdit]: 'Edit profile',
+  [paths.changePassword]: 'Change password',
 }
 
 export function resolvePageTitle(pathname) {

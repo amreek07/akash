@@ -10,6 +10,9 @@ import Dashboard from '@/pages/dashboard/Dashboard'
 import CourseList from '@/pages/courses/CourseList'
 import CourseFormPage from '@/pages/courses/CourseFormPage'
 import CourseDetails from '@/pages/courses/CourseDetails'
+import Profile from '@/pages/profile/Profile'
+import EditProfile from '@/pages/profile/EditProfile'
+import ChangePassword from '@/pages/profile/ChangePassword'
 import NotFound from '@/pages/NotFound'
 import { paths, resolvePageTitle } from '@/routes/paths'
 import PrivateRoute from '@/routes/PrivateRoute'
@@ -47,6 +50,9 @@ export default function AppRoutes() {
           <Route path={paths.courseNew} element={<CourseFormPage />} />
           <Route path="/courses/:id/edit" element={<CourseFormPage />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
+          <Route path={paths.profile} element={<Profile />} />
+          <Route path={paths.profileEdit} element={<EditProfile />} />
+          <Route path={paths.changePassword} element={<ChangePassword />} />
         </Route>
       </Route>
 

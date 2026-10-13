@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import Icon from '@/components/common/Icon'
 import Logo from '@/components/common/Logo'
 import { adminNavigation } from '@/config/navigation'
@@ -86,7 +86,13 @@ export default function Sidebar() {
             {collapsed ? null : <span>Collapse</span>}
           </button>
 
-          <div className={`flex items-center gap-3 rounded-xl bg-surface p-2.5 ${collapsed ? 'lg:justify-center' : ''}`}>
+          <Link
+            to={paths.profile}
+            title="Profile"
+            className={`flex items-center gap-3 rounded-xl bg-surface p-2.5 transition hover:ring-2 hover:ring-logo/30 ${
+              collapsed ? 'lg:justify-center' : ''
+            }`}
+          >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-shade text-xs font-semibold text-white">
               {initials(name)}
             </span>
@@ -94,7 +100,7 @@ export default function Sidebar() {
               <span className="block truncate text-sm font-semibold text-heading">{name}</span>
               <span className="block truncate text-xs text-muted">{user?.email || 'Administrator'}</span>
             </span>
-          </div>
+          </Link>
 
           <button
             type="button"
