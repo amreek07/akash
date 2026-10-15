@@ -13,6 +13,7 @@ import CourseDetails from '@/pages/courses/CourseDetails'
 import Profile from '@/pages/profile/Profile'
 import EditProfile from '@/pages/profile/EditProfile'
 import ChangePassword from '@/pages/profile/ChangePassword'
+import NotificationList from '@/pages/notifications/NotificationList'
 import ResponseList from '@/pages/responses/ResponseList'
 import ResponseDetails from '@/pages/responses/ResponseDetails'
 import GeneralContent from '@/pages/content/GeneralContent'
@@ -60,6 +61,7 @@ export default function AppRoutes() {
           <Route path={paths.profile} element={<Profile />} />
           <Route path={paths.profileEdit} element={<EditProfile />} />
           <Route path={paths.changePassword} element={<ChangePassword />} />
+          <Route path={paths.notifications} element={<NotificationList />} />
           <Route path="/responses" element={<Navigate to={paths.responses} replace />} />
           <Route path="/responses/:kind" element={<ResponseList />} />
           <Route path="/responses/:kind/:id" element={<ResponseDetails />} />

@@ -26,6 +26,12 @@ export const adminNavigation = [
     description: 'Site content',
   },
   {
+    label: 'Notifications',
+    to: paths.notifications,
+    icon: 'bell',
+    description: 'Admin alerts',
+  },
+  {
     label: 'Profile',
     to: paths.profile,
     icon: 'user',

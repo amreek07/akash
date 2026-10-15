@@ -3,6 +3,7 @@ import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import Icon from '@/components/common/Icon'
 import Logo from '@/components/common/Logo'
 import { adminNavigation } from '@/config/navigation'
+import { unreadNotificationCount } from '@/constants/notifications'
 import { useSidebar } from '@/context/useSidebar'
 import { paths } from '@/routes/paths'
 import { logout } from '@/store/slices/authSlice'
@@ -14,8 +15,9 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const user = useAppSelector((state) => state.auth.user)
-  const { collapsed, mobileOpen, closeMobile, toggleCollapsed } = useSidebar()
+  const { collapsed, mobileOpen, closeMobile } = useSidebar()
   const name = user?.fullName || 'Administrator'
+  const unreadCount = unreadNotificationCount()
 
   useEffect(() => {
     closeMobile()
@@ -58,34 +60,39 @@ export default function Sidebar() {
           <p className={`px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted ${collapsed ? 'lg:hidden' : ''}`}>
             Menu
           </p>
-          {adminNavigation.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              title={item.label}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                  collapsed ? 'lg:justify-center lg:px-0' : ''
-                } ${isActive ? 'bg-logo text-white' : 'text-muted hover:bg-surface hover:text-heading'}`
-              }
-            >
-              <Icon name={item.icon} />
-              <span className={collapsed ? 'lg:hidden' : ''}>{item.label}</span>
-            </NavLink>
-          ))}
+          {adminNavigation.map((item) => {
+            const showBadge = item.to === paths.notifications && unreadCount > 0
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                title={item.label}
+                className={({ isActive }) =>
+                  `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                    collapsed ? 'lg:justify-center lg:px-0' : ''
+                  } ${isActive ? 'bg-logo text-white' : 'text-muted hover:bg-surface hover:text-heading'}`
+                }
+              >
+                <span className="relative">
+                  <Icon name={item.icon} />
+                  {showBadge && collapsed ? (
+                    <span className="absolute -right-1.5 -top-1.5 hidden h-2 w-2 rounded-full bg-red-500 lg:block" />
+                  ) : null}
+                </span>
+                <span className={`flex min-w-0 flex-1 items-center justify-between gap-2 ${collapsed ? 'lg:hidden' : ''}`}>
+                  <span className="truncate">{item.label}</span>
+                  {showBadge ? (
+                    <span className="grid min-w-5 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold leading-5 text-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  ) : null}
+                </span>
+              </NavLink>
+            )
+          })}
         </nav>
 
         <div className="border-t border-line p-3">
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="mb-3 hidden h-10 w-full items-center justify-center gap-2 rounded-lg border border-line text-sm font-medium text-muted hover:bg-surface lg:flex"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <Icon name="panel" className="h-4 w-4" />
-            {collapsed ? null : <span>Collapse</span>}
-          </button>
-
           <Link
             to={paths.profile}
             title="Profile"
