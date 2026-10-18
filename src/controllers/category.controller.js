@@ -8,8 +8,8 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const getAllCategories = asyncHandler(async (req, res) => {
-    const categories = await categoryService.getAllCategories(req.query, req.options);
-    res.status(200).json(new ApiResponse(200, { categories }, "Categories fetched successfully"));
+    const {categories, pagination} = await categoryService.getAllCategories(req.query, req.options);
+    res.status(200).json(new ApiResponse(200, { categories, pagination }, "Categories fetched successfully"));
 });
 
 const getCategoryById = asyncHandler(async (req, res) => {
@@ -32,6 +32,11 @@ const categoryStatusToggle = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, category, "Category status toggled successfully"));
 });
 
+const activeCategories = asyncHandler(async (req, res) => {
+    const categories = await categoryService.activeCategories();
+    res.status(200).json(new ApiResponse(200, categories, "Active categories fetched successfully"));
+});
+
 module.exports = {
     createCategory,
     getAllCategories,
@@ -39,4 +44,5 @@ module.exports = {
     updateCategory,
     deleteCategory,
     categoryStatusToggle,
+    activeCategories,
 };

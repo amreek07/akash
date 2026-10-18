@@ -14,6 +14,8 @@ router
   )
   .get(auth, categoryController.getAllCategories);
 
+  router.route('/active').get(auth, categoryController.activeCategories);
+
 router
   .route("/:id")
   .get(auth, validate(categoryValidation.categoryIdValidation), categoryController.getCategoryById)

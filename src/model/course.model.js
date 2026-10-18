@@ -45,6 +45,7 @@ const courseSchema = new mongoose.Schema({
     },
     isActive: {
         type: Boolean,
+        default: true,
     },
     isParentActive: {
         type: Boolean,

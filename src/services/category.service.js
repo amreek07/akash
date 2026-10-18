@@ -44,6 +44,10 @@ const updateCategory = async (id, categoryData) => {
     if (!isValidObjectId(id)) {
         throw new ApiError(400, "Invalid category ID");
     }
+    const existingCategory = await Category.findOne({ name: categoryData.name, _id: { $ne: id } });
+    if (existingCategory) {
+        throw new ApiError(400, "Category already exists");
+    }
     const category = await Category.findByIdAndUpdate(id, categoryData, { new: true });
     return category;
 };
@@ -65,11 +69,17 @@ const categoryStatusToggle = async (id) => {
     return category;
 }
 
+const activeCategories = async () => {
+    const categories = await Category.find({ isActive: true }).sort({ createdAt: -1 });
+    return categories;
+}
+
 module.exports = {
     createCategory,
     getAllCategories,
     getCategoryById,
     updateCategory,
     deleteCategory,
-    categoryStatusToggle
+    categoryStatusToggle,
+    activeCategories,
 };
