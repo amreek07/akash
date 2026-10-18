@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        select: false,
+        select: true,
     },
     role: {
         type: String,
@@ -43,12 +43,9 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true});
 
-userSchema.index({ email: 1 }, { unique: true });
-
-userSchema.pre('save', async function(next){
-    if(!this.isModified('password')) return next();
+userSchema.pre('save', async function(){
+    if(!this.isModified('password')) return;
     this.password = await bcrypt.hash(this.password, config.bcryptSaltRounds);
-    next();
 });
 
 userSchema.methods.isPasswordMatch = async function(password){

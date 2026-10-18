@@ -1,4 +1,4 @@
-const User = require('../model');
+const {User} = require('../model');
 const crypto = require('crypto');
 
 const generateOTP = ()=>{
@@ -15,7 +15,7 @@ const createUser = async (userData) => {
 }
 
 const getUserByEmail = async (email) => {
-    return await User.findOne({email});
+    return await User.findOne({email:email.toLowerCase()});
 }
 
 const getUserById = async (id) => {
