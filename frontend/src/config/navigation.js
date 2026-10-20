@@ -20,6 +20,12 @@ export const adminNavigation = [
     description: 'Course categories',
   },
   {
+    label: 'Partners',
+    to: paths.partners,
+    icon: 'partners',
+    description: 'Institute partners',
+  },
+  {
     label: 'Responses',
     to: '/responses',
     icon: 'inbox',
