@@ -41,6 +41,14 @@ const icons = {
       <path d="M4 7V5a1 1 0 0 1 1-1h4l2 2" />
     </>
   ),
+  partners: (
+    <>
+      <circle cx="9" cy="8" r="2.5" />
+      <circle cx="16" cy="9" r="2" />
+      <path d="M4 18.5c1.2-2.4 3.2-3.5 5-3.5s3.8 1.1 5 3.5" />
+      <path d="M13.5 15.2c1 .5 2 1.5 2.8 3.3" />
+    </>
+  ),
   user: (
     <>
       <circle cx="12" cy="8" r="3.2" />
