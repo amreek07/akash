@@ -35,6 +35,12 @@ const icons = {
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
     </>
   ),
+  categories: (
+    <>
+      <path d="M4 7h6l2 2h8v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" />
+      <path d="M4 7V5a1 1 0 0 1 1-1h4l2 2" />
+    </>
+  ),
   user: (
     <>
       <circle cx="12" cy="8" r="3.2" />

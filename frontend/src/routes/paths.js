@@ -9,6 +9,9 @@ export const paths = {
   courseNew: '/courses/new',
   courseDetails: (id) => `/courses/${id}`,
   courseEdit: (id) => `/courses/${id}/edit`,
+  categories: '/categories',
+  categoryNew: '/categories/new',
+  categoryEdit: (id) => `/categories/${id}/edit`,
   profile: '/profile',
   profileEdit: '/profile/edit',
   changePassword: '/profile/change-password',
@@ -32,6 +35,8 @@ export const pageTitles = {
   [paths.resetPassword]: 'Reset password',
   [paths.dashboard]: 'Dashboard',
   [paths.courses]: 'Courses',
+  [paths.categories]: 'Categories',
+  [paths.categoryNew]: 'Add category',
   [paths.profile]: 'Profile',
   [paths.profileEdit]: 'Edit profile',
   [paths.changePassword]: 'Change password',
@@ -50,6 +55,7 @@ export function resolvePageTitle(pathname) {
   if (pathname === paths.courseNew) return 'Add course'
   if (/^\/courses\/[^/]+\/edit$/.test(pathname)) return 'Edit course'
   if (/^\/courses\/[^/]+$/.test(pathname)) return 'Course details'
+  if (/^\/categories\/[^/]+\/edit$/.test(pathname)) return 'Edit category'
   if (/^\/responses\/(registrations|enquiries)\/[^/]+$/.test(pathname)) return 'Response details'
   if (/^\/content\/gallery\/[^/]+\/edit$/.test(pathname)) return 'Edit image'
   return 'Coding Hubs Institute'

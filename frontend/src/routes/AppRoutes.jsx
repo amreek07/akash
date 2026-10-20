@@ -10,6 +10,8 @@ import Dashboard from '@/pages/dashboard/Dashboard'
 import CourseList from '@/pages/courses/CourseList'
 import CourseFormPage from '@/pages/courses/CourseFormPage'
 import CourseDetails from '@/pages/courses/CourseDetails'
+import CategoryList from '@/pages/categories/CategoryList'
+import CategoryFormPage from '@/pages/categories/CategoryFormPage'
 import Profile from '@/pages/profile/Profile'
 import EditProfile from '@/pages/profile/EditProfile'
 import ChangePassword from '@/pages/profile/ChangePassword'
@@ -58,6 +60,9 @@ export default function AppRoutes() {
           <Route path={paths.courseNew} element={<CourseFormPage />} />
           <Route path="/courses/:id/edit" element={<CourseFormPage />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
+          <Route path={paths.categories} element={<CategoryList />} />
+          <Route path={paths.categoryNew} element={<CategoryFormPage />} />
+          <Route path="/categories/:id/edit" element={<CategoryFormPage />} />
           <Route path={paths.profile} element={<Profile />} />
           <Route path={paths.profileEdit} element={<EditProfile />} />
           <Route path={paths.changePassword} element={<ChangePassword />} />
