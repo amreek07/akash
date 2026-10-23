@@ -15,4 +15,5 @@ export const endpoints = {
   course: (id) => `/course/${id}`,
   courseFeatured: (id) => `/course/featured/${id}`,
   coursePublished: (id) => `/course/published/${id}`,
+  footer: '/footer',
 }

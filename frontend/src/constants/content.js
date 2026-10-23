@@ -68,4 +68,5 @@ export const seedFooter = {
   facebook: 'https://facebook.com',
   instagram: 'https://instagram.com',
   youtube: 'https://youtube.com',
+  copyright: '© 2026 Coding Hubs Institute. All rights reserved.',
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import TextArea from '@/components/common/TextArea'
@@ -6,14 +6,15 @@ import TextField from '@/components/common/TextField'
 import ContentTabs from '@/components/content/ContentTabs'
 import FooterPreview from '@/components/content/FooterPreview'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { saveFooter } from '@/store/slices/contentSlice'
+import { clearFooterFeedback, fetchFooter, toFooter, updateFooter } from '@/store/slices/contentSlice'
 import { validateEmail } from '@/utils/validators'
 
 function cloneFooter(footer) {
+  const next = toFooter(footer)
   return {
-    ...footer,
-    quickLinks: footer.quickLinks.map((link) => ({ ...link })),
-    popularCourses: footer.popularCourses.map((course) => ({ ...course })),
+    ...next,
+    quickLinks: next.quickLinks.map((link) => ({ ...link })),
+    popularCourses: next.popularCourses.map((course) => ({ ...course })),
   }
 }
 
@@ -29,9 +30,23 @@ export default function FooterContent() {
   const dispatch = useAppDispatch()
   const stored = useAppSelector((state) => state.content.footer)
   const logo = useAppSelector((state) => state.content.general?.logo || '')
+  const { footerStatus, footerRequest, footerError } = useAppSelector((state) => state.content)
   const [footer, setFooter] = useState(() => cloneFooter(stored))
   const [errors, setErrors] = useState({})
   const [saved, setSaved] = useState(false)
+  const loading = footerStatus === 'loading' && footerRequest.startsWith('content/fetchFooter')
+  const saving = footerStatus === 'loading' && footerRequest.startsWith('content/updateFooter')
+  const failed = footerStatus === 'failed' ? footerError : null
+
+  useEffect(() => {
+    dispatch(clearFooterFeedback())
+    dispatch(fetchFooter())
+  }, [dispatch])
+
+  useEffect(() => {
+    setFooter(cloneFooter(stored))
+    setErrors({})
+  }, [stored])
 
   function update(field, value) {
     setFooter((current) => ({ ...current, [field]: value }))
@@ -56,7 +71,7 @@ export default function FooterContent() {
     setSaved(false)
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = {
       instituteName: footer.instituteName.trim() ? '' : 'Institute name is required.',
@@ -64,6 +79,7 @@ export default function FooterContent() {
       address: footer.address.trim() ? '' : 'Address is required.',
       phone: footer.phone.trim() ? '' : 'Phone is required.',
       email: validateEmail(footer.email),
+      copyright: footer.copyright.trim() ? '' : 'Copyright line is required.',
       quickLinks: footer.quickLinks.some((link) => !link.label.trim()) ? 'Every quick link needs a label.' : '',
       popularCourses: footer.popularCourses.some((course) => !course.label.trim())
         ? 'Every popular course needs a name.'
@@ -72,23 +88,32 @@ export default function FooterContent() {
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
 
-    dispatch(
-      saveFooter({
-        ...footer,
-        instituteName: footer.instituteName.trim(),
-        tagline: footer.tagline.trim(),
-        address: footer.address.trim(),
-        phone: footer.phone.trim(),
-        email: footer.email.trim(),
-        quickLinks: footer.quickLinks.map((link) => ({
-          ...link,
-          label: link.label.trim(),
-          href: link.href.trim(),
-        })),
-        popularCourses: footer.popularCourses.map((course) => ({ ...course, label: course.label.trim() })),
-      }),
-    )
-    setSaved(true)
+    const payload = {
+      instituteName: footer.instituteName.trim(),
+      tagline: footer.tagline.trim(),
+      address: footer.address.trim(),
+      phone: footer.phone.trim(),
+      email: footer.email.trim(),
+      facebook: footer.facebook.trim(),
+      instagram: footer.instagram.trim(),
+      youtube: footer.youtube.trim(),
+      copyright: footer.copyright.trim(),
+      quickLinks: footer.quickLinks.map((link) => ({
+        id: link.id,
+        label: link.label.trim(),
+        href: link.href.trim(),
+      })),
+      popularCourses: footer.popularCourses.map((course) => ({
+        id: course.id,
+        label: course.label.trim(),
+        href: course.href?.trim() || '',
+      })),
+    }
+
+    const result = await dispatch(updateFooter(payload))
+    if (updateFooter.fulfilled.match(result)) {
+      setSaved(true)
+    }
   }
 
   return (
@@ -103,7 +128,9 @@ export default function FooterContent() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-5">
-        {saved ? <Alert tone="success">Footer content saved for this visit.</Alert> : null}
+        {loading ? <Alert tone="info">Loading footer content.</Alert> : null}
+        {failed ? <Alert>{failed}</Alert> : null}
+        {saved ? <Alert tone="success">Footer content saved.</Alert> : null}
 
         <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Institute</h3>
@@ -265,8 +292,23 @@ export default function FooterContent() {
           </div>
         </section>
 
+        <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Copyright</h3>
+          <div className="mt-4">
+            <TextField
+              label="Copyright line"
+              name="copyright"
+              value={footer.copyright}
+              error={errors.copyright}
+              onChange={(event) => update('copyright', event.target.value)}
+            />
+          </div>
+        </section>
+
         <div className="flex justify-end">
-          <Button type="submit">Save footer</Button>
+          <Button type="submit" loading={saving} disabled={loading}>
+            Save footer
+          </Button>
         </div>
       </form>
 

@@ -100,6 +100,9 @@ export default function FooterPreview({ footer, logo }) {
           </div>
         </div>
       </div>
+      <div className="border-t border-white/10 px-6 py-4 text-xs text-white/45 sm:px-8">
+        {footer.copyright || '© Coding Hubs Institute. All rights reserved.'}
+      </div>
     </footer>
   )
 }

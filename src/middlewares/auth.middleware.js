@@ -4,7 +4,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 
 const auth = asyncHandler(async (req, _, next) => {
-    const token =req.header('Authorization')?.replace('Bearer ', '') || req.cookies.accessToken;
+    const token = req.header('Authorization')?.replace('Bearer ', '') || req.cookies?.accessToken;
     
     if(!token){
         throw new ApiError(401, 'Access denied, unauthorized request');
