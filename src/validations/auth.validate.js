@@ -25,6 +25,7 @@ const verifyOTPValidation = {
 const resendOTPValidation = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
+    purpose: Joi.string().valid('login', 'reset').optional(),
   }),
 };
 

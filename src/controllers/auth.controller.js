@@ -49,7 +49,7 @@ const login = asyncHandler(async (req, res) => {
 
   const { otp, otpExpires } = userService.generateOTP();
   await userService.updateUser(user._id, { otp, otpExpires });
-  await emailService.sendOtp(user.email, otp);
+  await emailService.sendLoginOtp(user.email, otp, user.fullName);
 
   res
     .status(200)
@@ -110,7 +110,8 @@ const resendOTP = asyncHandler(async (req, res) => {
 
   const { otp, otpExpires } = userService.generateOTP();
   await userService.updateUser(user._id, { otp, otpExpires });
-  await emailService.sendOtp(user.email, otp);
+  const purpose = req.body.purpose === 'reset' ? 'reset' : 'login';
+  await emailService.sendResendOtp(user.email, otp, user.fullName, purpose);
 
   res
     .status(200)
@@ -127,7 +128,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
   const { otp, otpExpires } = userService.generateOTP();
   await userService.updateUser(user._id, { otp, otpExpires });
-  await emailService.sendOtp(user.email, otp);
+  await emailService.sendForgotPasswordOtp(user.email, otp, user.fullName);
 
   res
     .status(200)

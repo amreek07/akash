@@ -2,6 +2,7 @@ const { Response, Course } = require('../model');
 const ApiError = require('../utils/ApiError');
 const { isValidObjectId } = require('mongoose');
 const notificationService = require('./notification.service');
+const emailService = require('./email.service');
 
 const populateCourse = { path: 'course', select: 'title fees' };
 const allowedTypes = ['enquiry', 'registration', 'general'];
@@ -13,6 +14,11 @@ const createResponse = async (responseData) => {
         await notificationService.createForResponse(newResponse);
     } catch {
         // A failed alert must not roll back the saved response.
+    }
+    try {
+        await emailService.sendResponseThankYou(newResponse);
+    } catch {
+        // A failed thank-you email must not roll back the saved response.
     }
     return newResponse;
 };

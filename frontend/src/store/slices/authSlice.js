@@ -167,11 +167,10 @@ export const resendOtp = createAsyncThunk(
   'auth/resendOtp',
   async ({ email, purpose }, { rejectWithValue }) => {
     try {
-      if (purpose === 'reset') {
-        await authApi.forgetPassword({ email: normalizeEmail(email) })
-      } else {
-        await authApi.resendOtp({ email: normalizeEmail(email) })
-      }
+      await authApi.resendOtp({
+        email: normalizeEmail(email),
+        purpose: purpose === 'reset' ? 'reset' : 'login',
+      })
       return true
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
