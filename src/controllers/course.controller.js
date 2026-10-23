@@ -8,7 +8,11 @@ const createCourse = asyncHandler(async (req, res) => {
 });
 
 const getAllCourses = asyncHandler(async (req, res) => {
-    const { courses, pagination } = await courseService.getAllCourses(req.query, req.options);
+    const { search, page, limit } = req.query;
+    const { courses, pagination } = await courseService.getAllCourses(
+        { search },
+        { page: Number(page) || 1, limit: Number(limit) || 50 },
+    );
     res.status(200).json(new ApiResponse(200, { courses, pagination }, "Courses fetched successfully"));
 });
 

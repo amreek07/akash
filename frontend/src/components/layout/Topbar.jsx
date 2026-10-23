@@ -1,13 +1,18 @@
 import { Link, useLocation } from 'react-router-dom'
+import Avatar from '@/components/common/Avatar'
 import Icon from '@/components/common/Icon'
 import { unreadNotificationCount } from '@/constants/notifications'
 import { useSidebar } from '@/context/useSidebar'
 import { paths, resolvePageTitle } from '@/routes/paths'
+import { useAppSelector } from '@/store/hooks'
+
 export default function Topbar() {
   const { pathname } = useLocation()
   const { collapsed, openMobile, toggleCollapsed } = useSidebar()
   const title = resolvePageTitle(pathname)
   const unreadCount = unreadNotificationCount()
+  const user = useAppSelector((state) => state.auth.user)
+  const name = user?.fullName || 'Admin'
   const today = new Intl.DateTimeFormat('en', {
     weekday: 'long',
     month: 'long',
@@ -62,12 +67,12 @@ export default function Topbar() {
           className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition hover:bg-surface sm:pr-3"
           aria-label="Open profile management"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-[#d9e2f5] text-shade">
-            <Icon name="user" className="h-4 w-4" />
-          </span>
+          <Avatar user={user} name={name} size="sm" className="bg-[#d9e2f5] text-shade" />
           <span className="hidden min-w-0 sm:block">
-            <span className="block truncate text-sm font-semibold leading-tight text-heading">Admin</span>
-            <span className="block truncate text-xs leading-tight text-muted">Super Admin</span>
+            <span className="block truncate text-sm font-semibold leading-tight text-heading">{name}</span>
+            <span className="block truncate text-xs leading-tight text-muted">
+              {user?.role === 'admin' ? 'Administrator' : user?.role || 'Administrator'}
+            </span>
           </span>
         </Link>
       </div>

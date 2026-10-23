@@ -1,41 +1,61 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Alert from '@/components/common/Alert'
 import Icon from '@/components/common/Icon'
+import ToggleSwitch from '@/components/common/ToggleSwitch'
 import ConfirmDialog from '@/components/courses/ConfirmDialog'
+import { formatDuration } from '@/constants/courses'
 import { paths } from '@/routes/paths'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { deleteCourse } from '@/store/slices/coursesSlice'
+import {
+  clearCourseFeedback,
+  deleteCourse,
+  fetchCourses,
+  toggleCourseFeatured,
+  toggleCoursePublished,
+} from '@/store/slices/coursesSlice'
 import { formatInr } from '@/utils/currency'
 
-function subjectPreview(subjects) {
-  if (!subjects.length) return '—'
-  const shown = subjects.slice(0, 2).join(', ')
-  const extra = subjects.length - 2
-  return extra > 0 ? `${shown} +${extra}` : shown
+const PAGE_SIZE = 50
+
+function StatusBadge({ active, onLabel = 'Active', offLabel = 'Inactive' }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+        active ? 'bg-primary/10 text-primary' : 'bg-surface text-muted'
+      }`}
+    >
+      {active ? onLabel : offLabel}
+    </span>
+  )
 }
 
 export default function CourseList() {
   const dispatch = useAppDispatch()
-  const courses = useAppSelector((state) => state.courses.items)
+  const { items, pagination, status, request, error } = useAppSelector((state) => state.courses)
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState('all')
+  const [page, setPage] = useState(1)
   const [pendingDelete, setPendingDelete] = useState(null)
+  const loading = status === 'loading' && request.startsWith('courses/fetchAll')
+  const deleting = status === 'loading' && request.startsWith('courses/delete')
+  const publishedCount = items.filter((course) => course.isPublished).length
 
-  const visibleCourses = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    return courses.filter((course) => {
-      const matchesStatus =
-        status === 'all' || (status === 'active' ? course.isActive : !course.isActive)
-      if (!matchesStatus) return false
-      if (!needle) return true
-      const haystack = [course.name, course.type, course.requirement, course.duration, ...course.subjects]
-        .join(' ')
-        .toLowerCase()
-      return haystack.includes(needle)
-    })
-  }, [courses, query, status])
+  useEffect(() => {
+    dispatch(clearCourseFeedback())
+    const handle = setTimeout(() => {
+      dispatch(fetchCourses({ page, limit: PAGE_SIZE, search: query.trim() }))
+    }, query ? 300 : 0)
+    return () => clearTimeout(handle)
+  }, [dispatch, page, query])
 
-  const activeCount = courses.filter((course) => course.isActive).length
+  async function handleDelete() {
+    if (!pendingDelete) return
+    const result = await dispatch(deleteCourse(pendingDelete.id))
+    setPendingDelete(null)
+    if (deleteCourse.fulfilled.match(result)) {
+      dispatch(fetchCourses({ page, limit: PAGE_SIZE, search: query.trim() }))
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -44,7 +64,7 @@ export default function CourseList() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Catalogue</p>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight text-heading">Courses</h2>
           <p className="mt-1 text-sm text-muted">
-            {courses.length} courses · {activeCount} active
+            {pagination.total} courses · {publishedCount} published on this page
           </p>
         </div>
         <Link
@@ -56,6 +76,8 @@ export default function CourseList() {
         </Link>
       </div>
 
+      {error ? <Alert>{error}</Alert> : null}
+
       <section className="overflow-hidden rounded-2xl border border-line bg-white">
         <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-4 sm:px-5">
           <label className="relative min-w-[220px] flex-1">
@@ -63,86 +85,96 @@ export default function CourseList() {
             <Icon name="search" className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               value={query}
-              placeholder="Search name, type, or subject"
+              placeholder="Search course title"
               className="h-11 w-full rounded-lg border border-line bg-surface pr-3 pl-9 text-sm text-heading outline-none transition placeholder:text-muted/70 focus:border-logo focus:bg-white focus:ring-4 focus:ring-logo/15"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setPage(1)
+                setQuery(event.target.value)
+              }}
             />
           </label>
-          <div className="flex rounded-lg bg-surface p-1">
-            {[
-              ['all', 'All'],
-              ['active', 'Active'],
-              ['inactive', 'Inactive'],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setStatus(value)}
-                className={`h-9 rounded-md px-3 text-sm font-semibold ${
-                  status === value ? 'bg-white text-heading shadow-sm' : 'text-muted'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {visibleCourses.length ? (
+        {loading && !items.length ? (
+          <div className="px-6 py-16 text-center">
+            <h3 className="text-lg font-semibold text-heading">Loading courses</h3>
+            <p className="mt-1 text-sm text-muted">Fetching the latest list from the server.</p>
+          </div>
+        ) : items.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-[1080px] text-left text-sm">
               <thead className="bg-surface text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Course</th>
-                  <th className="px-4 py-3 font-semibold">Type</th>
+                  <th className="px-4 py-3 font-semibold">Category</th>
                   <th className="px-4 py-3 font-semibold">Duration</th>
-                  <th className="px-4 py-3 font-semibold">Requirement</th>
-                  <th className="px-4 py-3 font-semibold">Subjects</th>
-                  <th className="px-4 py-3 font-semibold">Fee</th>
-                  <th className="px-4 py-3 font-semibold">Offer</th>
+                  <th className="px-4 py-3 font-semibold">Eligibility</th>
+                  <th className="px-4 py-3 font-semibold">Fees</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Featured</th>
+                  <th className="px-4 py-3 font-semibold">Published</th>
                   <th className="px-5 py-3 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {visibleCourses.map((course) => (
+                {items.map((course) => (
                   <tr key={course.id} className="border-t border-line align-top hover:bg-surface/70">
                     <td className="px-5 py-4">
                       <Link
                         to={paths.courseDetails(course.id)}
                         className="font-semibold text-heading hover:text-logo"
                       >
-                        {course.name}
+                        {course.title}
                       </Link>
                       <p className="mt-1 max-w-xs text-xs leading-5 text-muted line-clamp-2">{course.description}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="inline-flex rounded-full bg-logo/10 px-2.5 py-1 text-xs font-semibold text-logo">
-                        {course.type}
-                      </span>
+                      <p className="font-medium text-heading">{course.categoryName || '—'}</p>
+                      <p className="mt-1">
+                        <StatusBadge
+                          active={course.isParentActive}
+                          onLabel="Category on"
+                          offLabel="Category off"
+                        />
+                      </p>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-heading">{course.duration}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-heading">{course.requirement}</td>
-                    <td className="px-4 py-4 max-w-[180px] text-muted">{subjectPreview(course.subjects)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-heading">{formatInr(course.fee)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap font-semibold text-heading">
-                      {course.offerPrice === null ? '—' : formatInr(course.offerPrice)}
+                    <td className="px-4 py-4 whitespace-nowrap text-heading">{formatDuration(course.duration)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-heading">{course.eligibility || '—'}</td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <p className="font-semibold text-heading">
+                        {course.fees.offerPrice
+                          ? formatInr(course.fees.offerPrice)
+                          : formatInr(course.fees.price)}
+                      </p>
+                      {course.fees.offerPrice ? (
+                        <p className="text-xs text-muted line-through">{formatInr(course.fees.price)}</p>
+                      ) : null}
                     </td>
                     <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          course.isActive ? 'bg-primary/10 text-primary' : 'bg-surface text-muted'
-                        }`}
-                      >
-                        {course.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      <StatusBadge active={course.isActive} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <ToggleSwitch
+                        size="sm"
+                        checked={course.isFeatured}
+                        ariaLabel={`Featured ${course.title}`}
+                        onChange={() => dispatch(toggleCourseFeatured(course.id))}
+                      />
+                    </td>
+                    <td className="px-4 py-4">
+                      <ToggleSwitch
+                        size="sm"
+                        checked={course.isPublished}
+                        ariaLabel={`Published ${course.title}`}
+                        onChange={() => dispatch(toggleCoursePublished(course.id))}
+                      />
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-1">
                         <Link
                           to={paths.courseDetails(course.id)}
                           title="View"
-                          aria-label={`View ${course.name}`}
+                          aria-label={`View ${course.title}`}
                           className="grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-white hover:text-logo"
                         >
                           <Icon name="eye" className="h-4 w-4" />
@@ -150,7 +182,7 @@ export default function CourseList() {
                         <Link
                           to={paths.courseEdit(course.id)}
                           title="Edit"
-                          aria-label={`Edit ${course.name}`}
+                          aria-label={`Edit ${course.title}`}
                           className="grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-white hover:text-heading"
                         >
                           <Icon name="pencil" className="h-4 w-4" />
@@ -158,7 +190,7 @@ export default function CourseList() {
                         <button
                           type="button"
                           title="Delete"
-                          aria-label={`Delete ${course.name}`}
+                          aria-label={`Delete ${course.title}`}
                           className="grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-white hover:text-red-600"
                           onClick={() => setPendingDelete(course)}
                         >
@@ -179,15 +211,39 @@ export default function CourseList() {
         )}
       </section>
 
+      {pagination.totalPages > 1 ? (
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            disabled={!pagination.hasPreviousPage || loading}
+            className="inline-flex h-10 items-center rounded-lg border border-line bg-white px-4 text-sm font-semibold text-heading hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+          >
+            Previous
+          </button>
+          <p className="text-sm text-muted">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <button
+            type="button"
+            disabled={!pagination.hasNextPage || loading}
+            className="inline-flex h-10 items-center rounded-lg border border-line bg-white px-4 text-sm font-semibold text-heading hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => setPage((current) => current + 1)}
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
+
       {pendingDelete ? (
         <ConfirmDialog
           title="Delete this course?"
-          description={`${pendingDelete.name} will be removed from the catalogue on this screen.`}
-          onClose={() => setPendingDelete(null)}
-          onConfirm={() => {
-            dispatch(deleteCourse(pendingDelete.id))
-            setPendingDelete(null)
+          description={`${pendingDelete.title} will be removed from the catalogue.`}
+          loading={deleting}
+          onClose={() => {
+            if (!deleting) setPendingDelete(null)
           }}
+          onConfirm={handleDelete}
         />
       ) : null}
     </div>

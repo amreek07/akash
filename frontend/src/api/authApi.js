@@ -34,6 +34,9 @@ export const authApi = {
   me() {
     return api.get(endpoints.me).then(unwrap)
   },
+  updateProfile(payload) {
+    return api.put(endpoints.me, payload).then(unwrap)
+  },
   logout(payload) {
     return api.post(endpoints.logout, payload).then(unwrap)
   },

@@ -1,21 +1,42 @@
+import { useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CourseForm from '@/components/courses/CourseForm'
 import { paths } from '@/routes/paths'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { addCourse, updateCourse } from '@/store/slices/coursesSlice'
+import { fetchCategories } from '@/store/slices/categoriesSlice'
+import {
+  clearCourseFeedback,
+  createCourse,
+  fetchCourseById,
+  updateCourse,
+} from '@/store/slices/coursesSlice'
 
 export default function CourseFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const course = useAppSelector((state) => state.courses.items.find((item) => item.id === id))
-  const types = useAppSelector((state) => state.courses.types)
+  const { items, current, status, request, error } = useAppSelector((state) => state.courses)
+  const categories = useAppSelector((state) => state.categories.items)
   const isEdit = Boolean(id)
+  const course = items.find((item) => item.id === id) || (current?.id === id ? current : null)
+  const loadingCourse = isEdit && !course && status !== 'failed'
+  const saving = status === 'loading' && (request.startsWith('courses/create') || request.startsWith('courses/update'))
+  const saveError =
+    status === 'failed' && (request.startsWith('courses/create') || request.startsWith('courses/update'))
+      ? error
+      : null
 
-  if (isEdit && !course) {
+  useEffect(() => {
+    dispatch(clearCourseFeedback())
+    dispatch(fetchCategories({ page: 1, limit: 100 }))
+    if (isEdit) dispatch(fetchCourseById(id))
+  }, [dispatch, id, isEdit])
+
+  if (isEdit && !course && !loadingCourse) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-line bg-white p-8 text-center">
         <h2 className="text-xl font-semibold text-heading">This course is not in the catalogue</h2>
+        {error ? <p className="mt-2 text-sm text-muted">{error}</p> : null}
         <Link to={paths.courses} className="mt-4 inline-flex text-sm font-semibold text-logo hover:underline">
           Back to courses
         </Link>
@@ -23,15 +44,21 @@ export default function CourseFormPage() {
     )
   }
 
-  function handleSubmit(values) {
-    if (isEdit) {
-      dispatch(updateCourse({ ...values, id: course.id }))
-      navigate(paths.courseDetails(course.id))
-      return
-    }
-    const nextId = `c-${Date.now()}`
-    dispatch(addCourse({ ...values, id: nextId }))
-    navigate(paths.courseDetails(nextId))
+  if (loadingCourse) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-2xl border border-line bg-white p-8 text-center">
+        <h2 className="text-xl font-semibold text-heading">Loading course</h2>
+        <p className="mt-2 text-sm text-muted">Fetching the latest details from the server.</p>
+      </div>
+    )
+  }
+
+  async function handleSubmit(values) {
+    const result = isEdit
+      ? await dispatch(updateCourse({ id: course.id, ...values }))
+      : await dispatch(createCourse(values))
+    const succeeded = isEdit ? updateCourse.fulfilled.match(result) : createCourse.fulfilled.match(result)
+    if (succeeded) navigate(isEdit ? paths.courseDetails(course.id) : paths.courses)
   }
 
   return (
@@ -47,13 +74,15 @@ export default function CourseFormPage() {
         {isEdit ? 'Edit course' : 'Add course'}
       </h2>
       <p className="mt-1 mb-6 max-w-2xl text-sm text-muted">
-        The same form is used to create a course and to change one that is already in the catalogue.
+        Category, duration, fees, eligibility, and the course, featured, and published flags.
       </p>
       <CourseForm
         key={course?.id || 'new'}
         initialValues={course}
-        types={types}
+        categories={categories}
         submitLabel={isEdit ? 'Save changes' : 'Add course'}
+        loading={saving}
+        error={saveError}
         onSubmit={handleSubmit}
       />
     </div>

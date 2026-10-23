@@ -1,7 +1,17 @@
+const fs = require('fs');
+const path = require('path');
 const asyncHandler = require("../utils/asyncHandler");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse")
 const { userService, emailService, tokenService } = require("../services");
+const { avatarDir } = require('../middlewares/upload.middleware');
+
+function removeAvatarFile(avatarPath) {
+  if (!avatarPath || !avatarPath.startsWith('/uploads/avatars/')) return;
+  const filename = path.basename(avatarPath);
+  const fullPath = path.join(avatarDir, filename);
+  fs.unlink(fullPath, () => {});
+}
 
 function publicUser(user) {
   const data = typeof user.toObject === 'function' ? user.toObject() : { ...user };
@@ -204,9 +214,44 @@ const refreshToken = asyncHandler(async (req, res) => {
 
 const me = asyncHandler(async (req, res) => {
   const user = await userService.getUserById(req.user.id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
   res
     .status(200)
     .json(new ApiResponse(200, { user: publicUser(user) }, "User details fetched successfully"));
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const user = await userService.getUserById(req.user.id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const fullName = String(req.body.fullName || '').trim();
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const countryCode = String(req.body.countryCode || '').trim();
+  const phone = String(req.body.phone || '').trim();
+
+  if (email !== user.email) {
+    const existing = await userService.getUserByEmail(email);
+    if (existing) {
+      throw new ApiError(400, "Email address already registered");
+    }
+  }
+
+  const update = { fullName, email, countryCode, phone };
+  if (req.file) {
+    update.avatar = `/uploads/avatars/${req.file.filename}`;
+    if (user.avatar && user.avatar !== update.avatar) {
+      removeAvatarFile(user.avatar);
+    }
+  }
+
+  const nextUser = await userService.updateUser(user._id, update);
+  res
+    .status(200)
+    .json(new ApiResponse(200, { user: publicUser(nextUser) }, "Profile updated successfully"));
 });
 
 const logout = asyncHandler(async (req, res) => {
@@ -240,5 +285,6 @@ module.exports = {
   verifyForgotPasswordOTP,
   resetPassword,
   changePassword,
-  me
+  me,
+  updateProfile,
 };

@@ -14,6 +14,14 @@ function toAdmin(user = {}) {
     role: user.role || '',
     countryCode: user.countryCode || '',
     phone: user.phone || '',
+    avatar: user.avatar || '',
+  }
+}
+
+function persistUser(getState, user) {
+  const { accessToken, refreshToken } = getState().auth
+  if (accessToken) {
+    tokenStorage.setSession({ accessToken, refreshToken, user })
   }
 }
 
@@ -121,6 +129,34 @@ export const changePassword = createAsyncThunk(
     try {
       await authApi.changePassword({ oldPassword, newPassword })
       return true
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error))
+    }
+  },
+)
+
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const data = await authApi.me()
+      const user = toAdmin(data?.user || data)
+      persistUser(getState, user)
+      return user
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error))
+    }
+  },
+)
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (payload, { getState, rejectWithValue }) => {
+    try {
+      const data = await authApi.updateProfile(payload)
+      const user = toAdmin(data?.user || data)
+      persistUser(getState, user)
+      return user
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
     }
@@ -250,6 +286,16 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(changePassword.rejected, rejected)
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.user = action.payload
+      })
+      .addCase(updateProfile.pending, pending)
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.error = null
+        state.user = action.payload
+      })
+      .addCase(updateProfile.rejected, rejected)
       .addCase(resendOtp.pending, (state) => {
         state.resendStatus = 'loading'
         state.resendMessage = ''
@@ -278,22 +324,5 @@ function rejected(state, action) {
 }
 
 export const { clearAuthFeedback, clearRecovery, updateTokens, clearSession, profileUpdated } = authSlice.actions
-
-export function saveProfile(profile) {
-  return (dispatch, getState) => {
-    const { user, accessToken, refreshToken } = getState().auth
-    const nextUser = {
-      ...user,
-      fullName: profile.fullName,
-      email: profile.email,
-      countryCode: profile.countryCode,
-      phone: profile.phone,
-    }
-    if (accessToken) {
-      tokenStorage.setSession({ accessToken, refreshToken, user: nextUser })
-    }
-    dispatch(profileUpdated(nextUser))
-  }
-}
 
 export default authSlice.reducer

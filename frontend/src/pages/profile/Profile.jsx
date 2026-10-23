@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 import Alert from '@/components/common/Alert'
+import Avatar from '@/components/common/Avatar'
 import Icon from '@/components/common/Icon'
 import { paths } from '@/routes/paths'
 import { useAppSelector } from '@/store/hooks'
-import { initials } from '@/utils/format'
 
 function displayPhone(user) {
   if (!user?.phone) return 'Not added'
@@ -27,9 +27,7 @@ export default function Profile() {
     <div className="mx-auto max-w-4xl">
       <div className="overflow-hidden rounded-2xl bg-shade text-white">
         <div className="flex flex-wrap items-center gap-5 p-6 sm:p-8">
-          <span className="grid h-16 w-16 place-items-center rounded-2xl bg-logo text-xl font-semibold">
-            {initials(name)}
-          </span>
+          <Avatar user={user} name={name} size="lg" rounded="2xl" className="bg-logo" />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold">Administrator</p>
             <h2 className="mt-1 text-3xl font-semibold tracking-tight">{name}</h2>
@@ -71,7 +69,7 @@ export default function Profile() {
           </span>
           <span>
             <span className="block text-sm font-semibold text-heading">Edit profile</span>
-            <span className="mt-1 block text-sm text-muted">Update name, email, and phone.</span>
+            <span className="mt-1 block text-sm text-muted">Update name, email, phone, and avatar.</span>
           </span>
         </Link>
         <Link

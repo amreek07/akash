@@ -1,6 +1,6 @@
 const asyncHandler = require("../utils/asyncHandler");
 const ApiResponse = require("../utils/ApiResponse");
-const { categoryService } = require("../services");
+const { categoryService, courseService } = require("../services");
 
 const createCategory = asyncHandler(async (req, res) => {
     const category = await categoryService.createCategory(req.body);
@@ -23,6 +23,9 @@ const getCategoryById = asyncHandler(async (req, res) => {
 
 const updateCategory = asyncHandler(async (req, res) => {
     const category = await categoryService.updateCategory(req.params.id, req.body);
+    if (typeof req.body.isActive === 'boolean') {
+        await courseService.toggleParent(category._id, category.isActive);
+    }
     res.status(200).json(new ApiResponse(200, { category }, "Category updated successfully"));
 });
 
@@ -33,6 +36,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
 const categoryStatusToggle = asyncHandler(async (req, res) => {
    const category = await categoryService.categoryStatusToggle(req.params.id);
+   await courseService.toggleParent(category._id, category.isActive);
     res.status(200).json(new ApiResponse(200, category, "Category status toggled successfully"));
 });
 

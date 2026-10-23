@@ -11,4 +11,8 @@ export const endpoints = {
   me: '/auth/me',
   categories: '/category',
   category: (id) => `/category/${id}`,
+  courses: '/course',
+  course: (id) => `/course/${id}`,
+  courseFeatured: (id) => `/course/featured/${id}`,
+  coursePublished: (id) => `/course/published/${id}`,
 }

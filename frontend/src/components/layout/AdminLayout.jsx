@@ -1,11 +1,19 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar'
 import Topbar from '@/components/layout/Topbar'
 import { SidebarProvider } from '@/context/SidebarProvider'
 import { useSidebar } from '@/context/useSidebar'
+import { fetchCurrentUser } from '@/store/slices/authSlice'
+import { useAppDispatch } from '@/store/hooks'
 
 function AdminShell() {
+  const dispatch = useAppDispatch()
   const { collapsed } = useSidebar()
+
+  useEffect(() => {
+    dispatch(fetchCurrentUser())
+  }, [dispatch])
 
   return (
     <div className="min-h-svh bg-surface">

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
+import Avatar from '@/components/common/Avatar'
 import Icon from '@/components/common/Icon'
 import Logo from '@/components/common/Logo'
 import { adminNavigation } from '@/config/navigation'
@@ -8,7 +9,6 @@ import { useSidebar } from '@/context/useSidebar'
 import { paths } from '@/routes/paths'
 import { logout } from '@/store/slices/authSlice'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { initials } from '@/utils/format'
 
 export default function Sidebar() {
   const dispatch = useAppDispatch()
@@ -100,9 +100,7 @@ export default function Sidebar() {
               collapsed ? 'lg:justify-center' : ''
             }`}
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-shade text-xs font-semibold text-white">
-              {initials(name)}
-            </span>
+            <Avatar user={user} name={name} size="sm" />
             <span className={`min-w-0 ${collapsed ? 'lg:hidden' : ''}`}>
               <span className="block truncate text-sm font-semibold text-heading">{name}</span>
               <span className="block truncate text-xs text-muted">{user?.email || 'Administrator'}</span>

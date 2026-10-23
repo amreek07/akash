@@ -90,7 +90,7 @@ export default function ResponseDetails() {
 
       {course ? (
         <Link to={paths.courseDetails(course.id)} className="mt-5 inline-flex text-sm font-semibold text-logo hover:underline">
-          Open {course.name} in courses
+          Open {course.title || course.name} in courses
         </Link>
       ) : null}
     </div>

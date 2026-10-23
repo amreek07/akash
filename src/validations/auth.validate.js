@@ -55,6 +55,15 @@ const changePasswordValidation = {
   }),
 };
 
+const updateProfileValidation = {
+  body: Joi.object().keys({
+    fullName: Joi.string().required(),
+    email: Joi.string().email().required(),
+    countryCode: Joi.string().allow('').optional(),
+    phone: Joi.string().allow('').optional(),
+  }),
+};
+
 const logoutValidation = {
   body: Joi.object().keys({
     refreshToken: Joi.string().required(),
@@ -70,5 +79,6 @@ module.exports = {
   verifyForgotPasswordOTPValidation,
   resetPasswordValidation,
   changePasswordValidation,
+  updateProfileValidation,
   logoutValidation,
 };

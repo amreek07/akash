@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => {
           target: env.PROXY_TARGET || 'http://localhost:8000',
           changeOrigin: true,
         },
+        '/uploads': {
+          target: env.PROXY_TARGET || 'http://localhost:8000',
+          changeOrigin: true,
+        },
       },
     },
   }

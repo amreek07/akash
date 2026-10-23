@@ -1,115 +1,142 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import SelectField from '@/components/common/SelectField'
 import TextArea from '@/components/common/TextArea'
 import TextField from '@/components/common/TextField'
-import { durationOptions, requirementOptions } from '@/constants/courses'
+import ToggleSwitch from '@/components/common/ToggleSwitch'
+import { durationUnits, eligibilityOptions } from '@/constants/courses'
 import { paths } from '@/routes/paths'
 
 const emptyValues = {
-  name: '',
+  title: '',
   description: '',
-  duration: '',
-  subjects: [],
-  requirement: '',
-  fee: '',
+  categoryId: '',
+  durationValue: '',
+  durationUnit: 'months',
+  price: '',
   offerPrice: '',
-  type: '',
+  eligibility: '',
   isActive: true,
+  isFeatured: false,
+  isPublished: false,
 }
 
-function moneyError(value, label) {
-  if (value === '' || value === null || value === undefined) return ''
+function moneyError(value, label, required = false) {
+  if (value === '' || value === null || value === undefined) {
+    return required ? `${label} is required.` : ''
+  }
   const amount = Number(value)
   if (!Number.isFinite(amount) || amount < 0) return `${label} must be a valid amount.`
   return ''
 }
 
+function fromInitial(initialValues) {
+  return {
+    ...emptyValues,
+    title: initialValues?.title || '',
+    description: initialValues?.description || '',
+    categoryId: initialValues?.categoryId || '',
+    durationValue: initialValues?.duration?.value ?? '',
+    durationUnit: initialValues?.duration?.unit || 'months',
+    price: initialValues?.fees?.price ?? '',
+    offerPrice: initialValues?.fees?.offerPrice ?? '',
+    eligibility: initialValues?.eligibility || '',
+    isActive: initialValues?.isActive !== false,
+    isFeatured: Boolean(initialValues?.isFeatured),
+    isPublished: Boolean(initialValues?.isPublished),
+  }
+}
+
+function ToggleRow({ title, description, checked, onChange, disabled }) {
+  return (
+    <section className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-white px-5 py-4">
+      <div>
+        <p className="text-sm font-semibold text-heading">{title}</p>
+        <p className="mt-1 text-sm text-muted">{description}</p>
+      </div>
+      <ToggleSwitch checked={checked} onChange={onChange} disabled={disabled} ariaLabel={title} />
+    </section>
+  )
+}
+
 export default function CourseForm({
   initialValues,
-  types,
+  categories = [],
   submitLabel,
   onSubmit,
+  loading = false,
+  error,
 }) {
-  const [values, setValues] = useState(() => ({
-    ...emptyValues,
-    ...initialValues,
-    fee: initialValues?.fee ?? '',
-    offerPrice: initialValues?.offerPrice ?? '',
-    subjects: initialValues?.subjects ? [...initialValues.subjects] : [],
-  }))
-  const [subjectDraft, setSubjectDraft] = useState('')
-  const [typeDraft, setTypeDraft] = useState('')
+  const [values, setValues] = useState(() => fromInitial(initialValues))
   const [errors, setErrors] = useState({})
+
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === values.categoryId) || null,
+    [categories, values.categoryId],
+  )
+  const isParentActive = selectedCategory ? selectedCategory.isActive : false
 
   function update(field, value) {
     setValues((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: '' }))
   }
 
-  function addSubject() {
-    const subject = subjectDraft.trim()
-    if (!subject) return
-    const exists = values.subjects.some((item) => item.toLowerCase() === subject.toLowerCase())
-    if (!exists) update('subjects', [...values.subjects, subject])
-    setSubjectDraft('')
-  }
-
-  function removeSubject(subject) {
-    update(
-      'subjects',
-      values.subjects.filter((item) => item !== subject),
-    )
-  }
-
   function handleSubmit(event) {
     event.preventDefault()
-    const type = typeDraft.trim() || values.type
-    const feeError = values.fee === '' ? 'Course fee is required.' : moneyError(values.fee, 'Course fee')
+    const priceError = moneyError(values.price, 'Course fee', true)
     const offerError = moneyError(values.offerPrice, 'Offer price')
     const nextErrors = {
-      name: values.name.trim() ? '' : 'Course name is required.',
+      title: values.title.trim() ? '' : 'Course title is required.',
       description: values.description.trim() ? '' : 'Description is required.',
-      duration: values.duration ? '' : 'Select a duration.',
-      requirement: values.requirement ? '' : 'Select a requirement.',
-      type: type ? '' : 'Select a type or add one.',
-      subjects: values.subjects.length ? '' : 'Add at least one subject.',
-      fee: feeError,
+      categoryId: values.categoryId ? '' : 'Select a category.',
+      durationValue: Number(values.durationValue) >= 1 ? '' : 'Duration must be at least 1.',
+      durationUnit: values.durationUnit ? '' : 'Select a duration unit.',
+      eligibility: values.eligibility ? '' : 'Select eligibility.',
+      price: priceError,
       offerPrice:
         offerError ||
-        (values.offerPrice !== '' && Number(values.offerPrice) > Number(values.fee)
+        (values.offerPrice !== '' && Number(values.offerPrice) > Number(values.price)
           ? 'Offer price cannot be higher than the course fee.'
           : ''),
     }
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
 
-    onSubmit({
-      name: values.name.trim(),
+    return onSubmit({
+      title: values.title.trim(),
       description: values.description.trim(),
-      duration: values.duration,
-      subjects: values.subjects,
-      requirement: values.requirement,
-      fee: Number(values.fee),
-      offerPrice: values.offerPrice === '' ? null : Number(values.offerPrice),
-      type,
+      category: values.categoryId,
+      duration: {
+        value: Number(values.durationValue),
+        unit: values.durationUnit,
+      },
+      fees: {
+        price: Number(values.price),
+        offerPrice: values.offerPrice === '' ? 0 : Number(values.offerPrice),
+        currency: 'INR',
+      },
+      eligibility: values.eligibility,
       isActive: values.isActive,
+      isFeatured: values.isFeatured,
+      isPublished: values.isPublished,
     })
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      <Alert>{error}</Alert>
       <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="lg:col-span-2">
             <TextField
-              label="Course name"
-              name="name"
-              value={values.name}
-              error={errors.name}
+              label="Title"
+              name="title"
+              value={values.title}
+              error={errors.title}
               placeholder="Diploma in Computer Applications"
-              onChange={(event) => update('name', event.target.value)}
+              onChange={(event) => update('title', event.target.value)}
             />
           </div>
           <div className="lg:col-span-2">
@@ -123,119 +150,80 @@ export default function CourseForm({
             />
           </div>
           <SelectField
-            label="Duration"
-            name="duration"
-            value={values.duration}
-            error={errors.duration}
-            onChange={(event) => update('duration', event.target.value)}
+            label="Category"
+            name="categoryId"
+            value={values.categoryId}
+            error={errors.categoryId}
+            hint="The category status is copied onto the course as parent status."
+            onChange={(event) => update('categoryId', event.target.value)}
           >
-            <option value="">Select duration</option>
-            {durationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            <option value="">Select category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+                {category.isActive ? '' : ' (inactive)'}
               </option>
             ))}
           </SelectField>
           <SelectField
-            label="Requirement"
-            name="requirement"
-            value={values.requirement}
-            error={errors.requirement}
-            onChange={(event) => update('requirement', event.target.value)}
+            label="Eligibility"
+            name="eligibility"
+            value={values.eligibility}
+            error={errors.eligibility}
+            onChange={(event) => update('eligibility', event.target.value)}
           >
-            <option value="">Select requirement</option>
-            {requirementOptions.map((option) => (
+            <option value="">Select eligibility</option>
+            {eligibilityOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </SelectField>
-          <div className="lg:col-span-2">
-            <SelectField
-              label="Type"
-              name="type"
-              value={values.type}
-              error={errors.type}
-              hint="Choose an existing type, or type a new one below. New types stay available for the next course."
-              onChange={(event) => update('type', event.target.value)}
-            >
-              <option value="">Select type</option>
-              {types.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </SelectField>
-            <div className="mt-3">
-              <TextField
-                label="Add a type"
-                name="typeDraft"
-                value={typeDraft}
-                placeholder="For example, Science"
-                onChange={(event) => {
-                  setTypeDraft(event.target.value)
-                  setErrors((current) => ({ ...current, type: '' }))
-                }}
-              />
-            </div>
-          </div>
-          <div className="lg:col-span-2">
-            <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-heading">
-              Subjects
-            </label>
-            <div className="flex gap-2">
-              <input
-                id="subject"
-                value={subjectDraft}
-                placeholder="Add a subject and press Enter"
-                className={`h-11 min-w-0 flex-1 rounded-lg border bg-white px-3 text-sm text-heading outline-none transition placeholder:text-muted/70 focus:border-logo focus:ring-4 focus:ring-logo/15 ${
-                  errors.subjects ? 'border-red-400' : 'border-line'
-                }`}
-                onChange={(event) => setSubjectDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
-                    addSubject()
-                  }
-                }}
-              />
-              <Button type="button" variant="gold" onClick={addSubject}>
-                Add
-              </Button>
-            </div>
-            {errors.subjects ? <p className="mt-1.5 text-xs text-red-600">{errors.subjects}</p> : null}
-            {values.subjects.length ? (
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {values.subjects.map((subject) => (
-                  <li
-                    key={subject}
-                    className="inline-flex items-center gap-2 rounded-full bg-logo/10 px-3 py-1.5 text-sm font-medium text-logo"
-                  >
-                    {subject}
-                    <button
-                      type="button"
-                      className="text-base leading-none text-shade"
-                      aria-label={`Remove ${subject}`}
-                      onClick={() => removeSubject(subject)}
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-2 text-xs text-muted">Subjects are stored as a list. Add one at a time.</p>
-            )}
-          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h3 className="text-sm font-semibold text-heading">Duration</h3>
+        <p className="mt-1 mb-4 text-sm text-muted">Number of days, months, or years this course runs.</p>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField
+            label="Duration value"
+            name="durationValue"
+            inputMode="numeric"
+            value={values.durationValue}
+            error={errors.durationValue}
+            placeholder="12"
+            onChange={(event) => update('durationValue', event.target.value)}
+          />
+          <SelectField
+            label="Duration unit"
+            name="durationUnit"
+            value={values.durationUnit}
+            error={errors.durationUnit}
+            onChange={(event) => update('durationUnit', event.target.value)}
+          >
+            {durationUnits.map((unit) => (
+              <option key={unit.value} value={unit.value}>
+                {unit.label}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <h3 className="text-sm font-semibold text-heading">Fees</h3>
+        <p className="mt-1 mb-4 text-sm text-muted">Amounts are stored in INR.</p>
+        <div className="grid gap-5 sm:grid-cols-2">
           <TextField
             label="Course fee"
-            name="fee"
+            name="price"
             inputMode="decimal"
             leading="₹"
-            value={values.fee}
-            error={errors.fee}
+            value={values.price}
+            error={errors.price}
             placeholder="45000"
-            onChange={(event) => update('fee', event.target.value)}
+            onChange={(event) => update('price', event.target.value)}
           />
           <TextField
             label="Offer price"
@@ -251,26 +239,34 @@ export default function CourseForm({
         </div>
       </section>
 
-      <section className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-white px-5 py-4">
-        <div>
-          <p className="text-sm font-semibold text-heading">Active</p>
-          <p className="mt-1 text-sm text-muted">Inactive courses stay in the catalogue and show as off.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={values.isActive}
-          aria-label="Active"
-          onClick={() => update('isActive', !values.isActive)}
-          className={`relative h-7 w-12 shrink-0 rounded-full transition ${values.isActive ? 'bg-primary' : 'bg-line'}`}
-        >
-          <span
-            className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
-              values.isActive ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
-      </section>
+      <ToggleRow
+        title="Course status"
+        description="Inactive courses stay in the catalogue and show as off."
+        checked={values.isActive}
+        onChange={(checked) => update('isActive', checked)}
+      />
+      <ToggleRow
+        title="Category status"
+        description={
+          selectedCategory
+            ? `${selectedCategory.name} is ${isParentActive ? 'active' : 'inactive'}. This follows the category, not the course.`
+            : 'Select a category to see whether its parent status is active.'
+        }
+        checked={isParentActive}
+        disabled
+      />
+      <ToggleRow
+        title="Featured"
+        description="Featured courses can be highlighted on the public site."
+        checked={values.isFeatured}
+        onChange={(checked) => update('isFeatured', checked)}
+      />
+      <ToggleRow
+        title="Published"
+        description="Unpublished courses stay in the admin catalogue and are hidden from the public site."
+        checked={values.isPublished}
+        onChange={(checked) => update('isPublished', checked)}
+      />
 
       <div className="flex flex-wrap justify-end gap-3">
         <Link
@@ -279,7 +275,9 @@ export default function CourseForm({
         >
           Cancel
         </Link>
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" loading={loading}>
+          {submitLabel}
+        </Button>
       </div>
     </form>
   )

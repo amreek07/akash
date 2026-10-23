@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Uploaded avatars
+public/uploads/avatars/*
+!public/uploads/avatars/.gitkeep

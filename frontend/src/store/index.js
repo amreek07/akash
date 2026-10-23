@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer, { clearSession, updateTokens } from '@/store/slices/authSlice'
 import categoriesReducer from '@/store/slices/categoriesSlice'
-import coursesReducer, { saveCoursePreview } from '@/store/slices/coursesSlice'
+import coursesReducer from '@/store/slices/coursesSlice'
 import contentReducer, { saveContentPreview } from '@/store/slices/contentSlice'
 import partnersReducer, { savePartnersPreview } from '@/store/slices/partnersSlice'
 import { bindAuthHandlers } from '@/api/axiosInstance'
@@ -17,7 +17,6 @@ export const store = configureStore({
 })
 
 store.subscribe(() => {
-  saveCoursePreview(store.getState().courses)
   savePartnersPreview(store.getState().partners)
   saveContentPreview(store.getState().content)
 })

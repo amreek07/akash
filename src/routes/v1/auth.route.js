@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('../../controllers/auth.controller');
 const validate = require('../../middlewares/validate.middleware');
 const auth = require('../../middlewares/auth.middleware');
+const { uploadAvatar } = require('../../middlewares/upload.middleware');
 const { authValidation } = require('../../validations');
 
 
@@ -16,6 +17,9 @@ router.post('/verify-otp', validate(authValidation.verifyOTPValidation), authCon
 router.post('/resend-otp', validate(authValidation.resendOTPValidation), authController.resendOTP);
 router.post('/change-password', auth, validate(authValidation.changePasswordValidation), authController.changePassword);
 router.post('/refresh-token', validate(authValidation.logoutValidation), authController.refreshToken);
-router.get('/me', auth, authController.me);
+router
+  .route('/me')
+  .get(auth, authController.me)
+  .put(auth, uploadAvatar, validate(authValidation.updateProfileValidation), authController.updateProfile);
 
 module.exports = router;
