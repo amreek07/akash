@@ -5,6 +5,7 @@ import Topbar from '@/components/layout/Topbar'
 import { SidebarProvider } from '@/context/SidebarProvider'
 import { useSidebar } from '@/context/useSidebar'
 import { fetchCurrentUser } from '@/store/slices/authSlice'
+import { fetchNotifications } from '@/store/slices/notificationsSlice'
 import { useAppDispatch } from '@/store/hooks'
 
 function AdminShell() {
@@ -13,6 +14,7 @@ function AdminShell() {
 
   useEffect(() => {
     dispatch(fetchCurrentUser())
+    dispatch(fetchNotifications({ page: 1, limit: 1 }))
   }, [dispatch])
 
   return (

@@ -4,7 +4,6 @@ import Avatar from '@/components/common/Avatar'
 import Icon from '@/components/common/Icon'
 import Logo from '@/components/common/Logo'
 import { adminNavigation } from '@/config/navigation'
-import { unreadNotificationCount } from '@/constants/notifications'
 import { useSidebar } from '@/context/useSidebar'
 import { paths } from '@/routes/paths'
 import { logout } from '@/store/slices/authSlice'
@@ -17,7 +16,7 @@ export default function Sidebar() {
   const user = useAppSelector((state) => state.auth.user)
   const { collapsed, mobileOpen, closeMobile } = useSidebar()
   const name = user?.fullName || 'Administrator'
-  const unreadCount = unreadNotificationCount()
+  const unreadCount = useAppSelector((state) => state.notifications.counts.unread)
 
   useEffect(() => {
     closeMobile()

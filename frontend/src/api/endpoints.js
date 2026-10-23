@@ -20,4 +20,8 @@ export const endpoints = {
   galleryItem: (id) => `/gallery/${id}`,
   responses: '/response',
   response: (id) => `/response/${id}`,
+  notifications: '/notification',
+  notification: (id) => `/notification/${id}`,
+  notificationRead: (id) => `/notification/${id}/read`,
+  notificationsReadAll: '/notification/read-all',
 }

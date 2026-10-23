@@ -1,12 +1,19 @@
 const { Response, Course } = require('../model');
 const ApiError = require('../utils/ApiError');
 const { isValidObjectId } = require('mongoose');
+const notificationService = require('./notification.service');
 
 const populateCourse = { path: 'course', select: 'title fees' };
 const allowedTypes = ['enquiry', 'registration', 'general'];
 
 const createResponse = async (responseData) => {
-    const newResponse = await Response.create(responseData);
+    const created = await Response.create(responseData);
+    const newResponse = await Response.findById(created._id).populate(populateCourse);
+    try {
+        await notificationService.createForResponse(newResponse);
+    } catch {
+        // A failed alert must not roll back the saved response.
+    }
     return newResponse;
 };
 

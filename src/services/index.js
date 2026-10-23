@@ -6,3 +6,4 @@ module.exports.courseService = require('./course.service');
 module.exports.responseService = require('./response.service');
 module.exports.footerService = require('./footer.service');
 module.exports.galleryService = require('./gallery.service');
+module.exports.notificationService = require('./notification.service');

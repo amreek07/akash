@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import Avatar from '@/components/common/Avatar'
 import Icon from '@/components/common/Icon'
-import { unreadNotificationCount } from '@/constants/notifications'
 import { useSidebar } from '@/context/useSidebar'
 import { paths, resolvePageTitle } from '@/routes/paths'
 import { useAppSelector } from '@/store/hooks'
@@ -10,7 +9,7 @@ export default function Topbar() {
   const { pathname } = useLocation()
   const { collapsed, openMobile, toggleCollapsed } = useSidebar()
   const title = resolvePageTitle(pathname)
-  const unreadCount = unreadNotificationCount()
+  const unreadCount = useAppSelector((state) => state.notifications.counts.unread)
   const user = useAppSelector((state) => state.auth.user)
   const name = user?.fullName || 'Admin'
   const today = new Intl.DateTimeFormat('en', {
