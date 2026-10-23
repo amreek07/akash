@@ -1,15 +1,22 @@
+import { useEffect } from 'react'
 import EnrollmentChart from '@/components/dashboard/EnrollmentChart'
 import Icon from '@/components/common/Icon'
 import { enrollmentMonths, institutePartners } from '@/constants/dashboard'
-import { responseRecords } from '@/constants/responses'
-import { useAppSelector } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { fetchResponses } from '@/store/slices/responsesSlice'
 import { firstName } from '@/utils/format'
 
 export default function Dashboard() {
+  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
   const courses = useAppSelector((state) => state.courses.items)
+  const registrationCount = useAppSelector((state) => state.responses.counts.registration)
   const name = user?.fullName || 'Administrator'
-  const newRegistrations = responseRecords.filter((record) => record.kind === 'registration').length
+  const newRegistrations = registrationCount
+
+  useEffect(() => {
+    dispatch(fetchResponses({ responseType: 'registration', page: 1, limit: 1 }))
+  }, [dispatch])
   const activeCourses = courses.filter((course) => course.isActive).length
   const activePartners = institutePartners.filter((partner) => partner.active).length
 

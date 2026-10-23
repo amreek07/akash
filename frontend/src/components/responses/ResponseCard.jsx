@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
+import { responseTabByRecordKind } from '@/constants/responseTabs'
 import { paths } from '@/routes/paths'
 import { formatInr } from '@/utils/currency'
 
 export default function ResponseCard({ record }) {
-  const kind = record.kind === 'registration' ? 'registrations' : 'enquiries'
+  const kind = responseTabByRecordKind[record.kind]?.kind || 'general'
 
   return (
     <Link
@@ -14,13 +15,17 @@ export default function ResponseCard({ record }) {
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-logo">Course</p>
         <p className="text-sm font-semibold text-heading">{formatInr(record.price)}</p>
       </div>
-      <h3 className="mt-2 text-lg font-semibold leading-snug text-heading">{record.courseTitle}</h3>
+      <h3 className="mt-2 text-lg font-semibold leading-snug text-heading">
+        {record.courseTitle || 'Course not selected'}
+      </h3>
       <div className="mt-4 border-t border-line pt-4">
         <p className="text-sm font-semibold text-heading">{record.userName}</p>
         <p className="mt-1 text-sm text-muted">{record.email}</p>
         <p className="mt-0.5 text-sm text-muted">{record.mobile}</p>
       </div>
-      <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted">{record.message}</p>
+      <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted">
+        {record.message || 'No message included.'}
+      </p>
       <span className="mt-4 text-sm font-semibold text-logo">View details</span>
     </Link>
   )

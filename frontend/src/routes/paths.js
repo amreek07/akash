@@ -48,6 +48,7 @@ export const pageTitles = {
   [paths.notifications]: 'Notifications',
   [paths.responses]: 'Responses',
   '/responses/enquiries': 'Responses',
+  '/responses/general': 'Responses',
   [paths.contentGeneral]: 'General',
   [paths.contentAbout]: 'About us',
   [paths.contentGallery]: 'Gallery',
@@ -62,7 +63,7 @@ export function resolvePageTitle(pathname) {
   if (/^\/courses\/[^/]+$/.test(pathname)) return 'Course details'
   if (/^\/categories\/[^/]+\/edit$/.test(pathname)) return 'Edit category'
   if (/^\/partners\/[^/]+\/edit$/.test(pathname)) return 'Edit partner'
-  if (/^\/responses\/(registrations|enquiries)\/[^/]+$/.test(pathname)) return 'Response details'
+  if (/^\/responses\/(registrations|enquiries|general)\/[^/]+$/.test(pathname)) return 'Response details'
   if (/^\/content\/gallery\/[^/]+\/edit$/.test(pathname)) return 'Edit image'
   return 'Coding Hubs Institute'
 }

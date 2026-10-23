@@ -4,6 +4,7 @@ import categoriesReducer from '@/store/slices/categoriesSlice'
 import coursesReducer from '@/store/slices/coursesSlice'
 import contentReducer, { saveContentPreview } from '@/store/slices/contentSlice'
 import partnersReducer, { savePartnersPreview } from '@/store/slices/partnersSlice'
+import responsesReducer from '@/store/slices/responsesSlice'
 import { bindAuthHandlers } from '@/api/axiosInstance'
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     partners: partnersReducer,
     content: contentReducer,
+    responses: responsesReducer,
   },
 })
 

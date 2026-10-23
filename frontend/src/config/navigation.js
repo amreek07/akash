@@ -29,7 +29,7 @@ export const adminNavigation = [
     label: 'Responses',
     to: '/responses',
     icon: 'inbox',
-    description: 'Registrations and enquiries',
+    description: 'Registrations, enquiries, and general',
   },
   {
     label: 'Content',

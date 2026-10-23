@@ -8,13 +8,17 @@ const createResponse = asyncHandler(async (req, res) => {
 });
 
 const getAllResponses = asyncHandler(async (req, res) => {
-    const { responses, pagination } = await responseService.getAllResponses(req.query, req.options);
-    res.status(200).json(new ApiResponse(200, { responses, pagination }, "Responses fetched successfully"));
+    const { search, page, limit, responseType } = req.query;
+    const { responses, pagination, counts } = await responseService.getAllResponses(
+        { search, responseType },
+        { page: Number(page) || 1, limit: Number(limit) || 50 },
+    );
+    res.status(200).json(new ApiResponse(200, { responses, pagination, counts }, "Responses fetched successfully"));
 });
 
 const getResponseById = asyncHandler(async (req, res) => {
     const response = await responseService.getResponseById(req.params.id);
-    res.status(200).json(new ApiResponse(200, response, "Response fetched successfully"));
+    res.status(200).json(new ApiResponse(200, { response }, "Response fetched successfully"));
 });
 
 const deleteResponse = asyncHandler(async (req, res) => {

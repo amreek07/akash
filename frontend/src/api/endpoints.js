@@ -18,4 +18,6 @@ export const endpoints = {
   footer: '/footer',
   gallery: '/gallery',
   galleryItem: (id) => `/gallery/${id}`,
+  responses: '/response',
+  response: (id) => `/response/${id}`,
 }
