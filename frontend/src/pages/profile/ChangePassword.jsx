@@ -1,19 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import PasswordField from '@/components/auth/PasswordField'
 import { paths } from '@/routes/paths'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { changePassword, clearAuthFeedback } from '@/store/slices/authSlice'
 import { validatePassword } from '@/utils/validators'
 
 export default function ChangePassword() {
+  const dispatch = useAppDispatch()
+  const { status, error, request } = useAppSelector((state) => state.auth)
   const [currentPassword, setCurrentPassword] = useState('')
   const [nextPassword, setNextPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState({})
   const [saved, setSaved] = useState(false)
+  const loading = status === 'loading' && request.startsWith('auth/changePassword')
+  const failed = status === 'failed' && request.startsWith('auth/changePassword')
 
-  function handleSubmit(event) {
+  useEffect(() => {
+    dispatch(clearAuthFeedback())
+  }, [dispatch])
+
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = {
       currentPassword: currentPassword ? '' : 'Current password is required.',
@@ -32,10 +42,20 @@ export default function ChangePassword() {
       return
     }
 
-    setCurrentPassword('')
-    setNextPassword('')
-    setConfirmPassword('')
-    setSaved(true)
+    const result = await dispatch(
+      changePassword({
+        oldPassword: currentPassword,
+        newPassword: nextPassword,
+      }),
+    )
+    if (changePassword.fulfilled.match(result)) {
+      setCurrentPassword('')
+      setNextPassword('')
+      setConfirmPassword('')
+      setSaved(true)
+    } else {
+      setSaved(false)
+    }
   }
 
   return (
@@ -53,6 +73,7 @@ export default function ChangePassword() {
       </p>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5 rounded-2xl border border-line bg-white p-5 sm:p-6">
+        <Alert>{failed ? error : null}</Alert>
         {saved ? <Alert tone="success">Password updated for this account.</Alert> : null}
         <PasswordField
           label="Current password"
@@ -101,7 +122,9 @@ export default function ChangePassword() {
           >
             Back
           </Link>
-          <Button type="submit">Update password</Button>
+          <Button type="submit" loading={loading}>
+            Update password
+          </Button>
         </div>
       </form>
     </div>

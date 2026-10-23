@@ -3,6 +3,19 @@ const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse")
 const { userService, emailService, tokenService } = require("../services");
 
+function publicUser(user) {
+  const data = typeof user.toObject === 'function' ? user.toObject() : { ...user };
+  delete data.password;
+  delete data.otp;
+  delete data.otpExpires;
+  delete data.refreshToken;
+  return data;
+}
+
+function readRefreshToken(req) {
+  return req.body?.refreshToken || req.cookies?.refreshToken;
+}
+
 const register = asyncHandler(async (req, res) => {
   const existingUser = await userService.getUserByEmail(req.body.email);
   if (existingUser) {
@@ -18,7 +31,7 @@ const register = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await userService.getUserByEmail(email);
+  const user = await userService.getUserByEmail(email.toLowerCase());
 
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(401, "Invalid email or password");
@@ -41,11 +54,11 @@ const login = asyncHandler(async (req, res) => {
 
 const verifyOTP = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
-  const user = await userService.getUserForOTPVerification(email);
+  const user = await userService.getUserForOTPVerification(email.toLowerCase());
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  if (user.otp !== otp) {
+  if (String(user.otp) !== String(otp).trim()) {
     throw new ApiError(400, "Invalid OTP");
   }
   if (Date.now() > user.otpExpires) {
@@ -72,7 +85,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { user, token: { accessToken, refreshToken } },
+        { user: publicUser(user), token: { accessToken, refreshToken } },
         "OTP verified successfully"
       )
     );
@@ -80,7 +93,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 
 const resendOTP = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const user = await userService.getUserByEmail(email);
+  const user = await userService.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -98,7 +111,7 @@ const resendOTP = asyncHandler(async (req, res) => {
 
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const user = await userService.getUserByEmail(email);
+  const user = await userService.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -115,11 +128,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
 const verifyForgotPasswordOTP = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
-  const user = await userService.getUserForOTPVerification(email);
+  const user = await userService.getUserForOTPVerification(email.toLowerCase());
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  if (user.otp !== otp) {
+  if (String(user.otp) !== String(otp).trim()) {
     throw new ApiError(400, "Invalid OTP");
   }
   if (Date.now() > user.otpExpires) {
@@ -133,7 +146,7 @@ const verifyForgotPasswordOTP = asyncHandler(async (req, res) => {
 
 const resetPassword = asyncHandler(async (req, res) => {
   const { email, newPassword } = req.body;
-  const user = await userService.getUserByEmail(email);
+  const user = await userService.getUserByEmail(email.toLowerCase());
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -147,13 +160,16 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-  const { email, oldPassword, newPassword } = req.body;
-  const user = await userService.getUserByEmail(email);
+  const { oldPassword, newPassword } = req.body;
+  const user = await userService.getUserById(req.user.id);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
   if (!(await user.isPasswordMatch(oldPassword))) {
     throw new ApiError(400, "Invalid old password");
+  }
+  if (oldPassword === newPassword) {
+    throw new ApiError(400, "New password cannot be the same as the old password");
   }
   await userService.updateUser(user._id, { password: newPassword });
   res
@@ -162,7 +178,7 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 const refreshToken = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.cookies || req.body;
+  const refreshToken = readRefreshToken(req);
   if (!refreshToken) {
     throw new ApiError(401, "Refresh token not provided");
   }
@@ -190,11 +206,11 @@ const me = asyncHandler(async (req, res) => {
   const user = await userService.getUserById(req.user.id);
   res
     .status(200)
-    .json(new ApiResponse(200, { user }, "User details fetched successfully"));
+    .json(new ApiResponse(200, { user: publicUser(user) }, "User details fetched successfully"));
 });
 
 const logout = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.cookies || req.body;
+  const refreshToken = readRefreshToken(req);
   if (!refreshToken) {
     throw new ApiError(401, "Refresh token not provided");
   }

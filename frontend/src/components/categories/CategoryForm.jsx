@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import TextArea from '@/components/common/TextArea'
 import TextField from '@/components/common/TextField'
@@ -11,7 +12,7 @@ const emptyValues = {
   isActive: true,
 }
 
-export default function CategoryForm({ initialValues, submitLabel, onSubmit }) {
+export default function CategoryForm({ initialValues, submitLabel, onSubmit, loading = false, error }) {
   const [values, setValues] = useState(() => ({
     ...emptyValues,
     ...initialValues,
@@ -32,7 +33,7 @@ export default function CategoryForm({ initialValues, submitLabel, onSubmit }) {
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
 
-    onSubmit({
+    return onSubmit({
       name: values.name.trim(),
       description: values.description.trim(),
       isActive: values.isActive,
@@ -41,6 +42,7 @@ export default function CategoryForm({ initialValues, submitLabel, onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5 rounded-2xl border border-line bg-white p-5 sm:p-6">
+      <Alert>{error}</Alert>
       <TextField
         label="Title"
         name="name"
@@ -85,7 +87,7 @@ export default function CategoryForm({ initialValues, submitLabel, onSubmit }) {
         >
           Cancel
         </Link>
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" loading={loading}>{submitLabel}</Button>
       </div>
     </form>
   )

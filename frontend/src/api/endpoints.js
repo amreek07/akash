@@ -4,7 +4,11 @@ export const endpoints = {
   resendOtp: '/auth/resend-otp',
   refresh: '/auth/refresh-token',
   logout: '/auth/logout',
-  forgetPassword: '/auth/forget-password',
-  verifyResetOtp: '/auth/verify-reset-otp',
+  forgetPassword: '/auth/forgot-password',
+  verifyResetOtp: '/auth/verify-forgot-password-otp',
   resetPassword: '/auth/reset-password',
+  changePassword: '/auth/change-password',
+  me: '/auth/me',
+  categories: '/category',
+  category: (id) => `/category/${id}`,
 }

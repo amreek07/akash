@@ -1,16 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Alert from '@/components/common/Alert'
 import Icon from '@/components/common/Icon'
 import ConfirmDialog from '@/components/courses/ConfirmDialog'
 import { paths } from '@/routes/paths'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { deleteCategory } from '@/store/slices/categoriesSlice'
+import { clearCategoryFeedback, deleteCategory, fetchCategories } from '@/store/slices/categoriesSlice'
+
+const PAGE_SIZE = 50
 
 export default function CategoryList() {
   const dispatch = useAppDispatch()
-  const categories = useAppSelector((state) => state.categories.items)
+  const { items, pagination, status, request, error } = useAppSelector((state) => state.categories)
   const [pendingDelete, setPendingDelete] = useState(null)
-  const activeCount = categories.filter((category) => category.isActive).length
+  const [page, setPage] = useState(1)
+  const loading = status === 'loading' && request.startsWith('categories/fetchAll')
+  const deleting = status === 'loading' && request.startsWith('categories/delete')
+  const activeCount = items.filter((category) => category.isActive).length
+
+  useEffect(() => {
+    dispatch(clearCategoryFeedback())
+    dispatch(fetchCategories({ page, limit: PAGE_SIZE }))
+  }, [dispatch, page])
+
+  async function handleDelete() {
+    if (!pendingDelete) return
+    const result = await dispatch(deleteCategory(pendingDelete.id))
+    setPendingDelete(null)
+    if (deleteCategory.fulfilled.match(result)) {
+      dispatch(fetchCategories({ page, limit: PAGE_SIZE }))
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -19,7 +39,7 @@ export default function CategoryList() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-logo">Catalogue</p>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight text-heading">Categories</h2>
           <p className="mt-1 text-sm text-muted">
-            {categories.length} categories · {activeCount} active
+            {pagination.total} categories · {activeCount} active
           </p>
         </div>
         <Link
@@ -31,9 +51,16 @@ export default function CategoryList() {
         </Link>
       </div>
 
-      {categories.length ? (
+      {error ? <div className="mt-5"><Alert>{error}</Alert></div> : null}
+
+      {loading && !items.length ? (
+        <div className="mt-6 rounded-2xl border border-line bg-white px-6 py-16 text-center">
+          <h3 className="text-lg font-semibold text-heading">Loading categories</h3>
+          <p className="mt-1 text-sm text-muted">Fetching the latest list from the server.</p>
+        </div>
+      ) : items.length ? (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {categories.map((category) => (
+          {items.map((category) => (
             <article
               key={category.id}
               className="flex flex-col rounded-2xl border border-line bg-white p-5"
@@ -76,15 +103,39 @@ export default function CategoryList() {
         </div>
       )}
 
+      {pagination.totalPages > 1 ? (
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            disabled={!pagination.hasPreviousPage || loading}
+            className="inline-flex h-10 items-center rounded-lg border border-line bg-white px-4 text-sm font-semibold text-heading hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+          >
+            Previous
+          </button>
+          <p className="text-sm text-muted">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <button
+            type="button"
+            disabled={!pagination.hasNextPage || loading}
+            className="inline-flex h-10 items-center rounded-lg border border-line bg-white px-4 text-sm font-semibold text-heading hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => setPage((current) => current + 1)}
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
+
       {pendingDelete ? (
         <ConfirmDialog
           title="Delete this category?"
-          description={`${pendingDelete.name} will be removed from the catalogue on this screen.`}
-          onClose={() => setPendingDelete(null)}
-          onConfirm={() => {
-            dispatch(deleteCategory(pendingDelete.id))
-            setPendingDelete(null)
+          description={`${pendingDelete.name} will be removed from the catalogue.`}
+          loading={deleting}
+          onClose={() => {
+            if (!deleting) setPendingDelete(null)
           }}
+          onConfirm={handleDelete}
         />
       ) : null}
     </div>

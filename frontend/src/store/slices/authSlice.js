@@ -22,32 +22,20 @@ function saveRecovery(recovery) {
   return recovery
 }
 
-export const previewLogin = createAsyncThunk('auth/previewLogin', async ({ email }) => {
-  const user = {
-    id: 'preview-admin',
-    fullName: 'Administrator',
-    email: email.trim(),
-    role: 'admin',
-    countryCode: '+91',
-    phone: '',
-  }
-  const accessToken = 'preview-access-token'
-  const refreshToken = 'preview-refresh-token'
-  tokenStorage.setSession({ accessToken, refreshToken, user })
-  recoveryStorage.clear()
-  return { user, accessToken, refreshToken }
-})
+function normalizeEmail(email) {
+  return email.trim().toLowerCase()
+}
 
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const normalizedEmail = email.trim()
+      const normalizedEmail = normalizeEmail(email)
       await authApi.login({ email: normalizedEmail, password })
       return saveRecovery({
         email: normalizedEmail,
         purpose: 'login',
-        resetToken: '',
+        otpVerified: false,
       })
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
@@ -59,7 +47,7 @@ export const verifyLoginOtp = createAsyncThunk(
   'auth/verifyLoginOtp',
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const data = await authApi.verifyOtp({ email, otp })
+      const data = await authApi.verifyOtp({ email: normalizeEmail(email), otp: String(otp).trim() })
       const user = toAdmin(data?.user)
       if (user.role !== 'admin') {
         tokenStorage.clear()
@@ -85,12 +73,12 @@ export const forgetPassword = createAsyncThunk(
   'auth/forgetPassword',
   async ({ email }, { rejectWithValue }) => {
     try {
-      const normalizedEmail = email.trim()
+      const normalizedEmail = normalizeEmail(email)
       await authApi.forgetPassword({ email: normalizedEmail })
       return saveRecovery({
         email: normalizedEmail,
         purpose: 'reset',
-        resetToken: '',
+        otpVerified: false,
       })
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
@@ -102,12 +90,12 @@ export const verifyResetOtp = createAsyncThunk(
   'auth/verifyResetOtp',
   async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const data = await authApi.verifyResetOtp({ email, otp })
-      const resetToken = data?.resetToken || (typeof data?.token === 'string' ? data.token : '')
-      if (!resetToken) {
-        return rejectWithValue('The code was accepted, but no reset token was returned.')
-      }
-      return saveRecovery({ email, purpose: 'reset', resetToken })
+      await authApi.verifyResetOtp({ email: normalizeEmail(email), otp: String(otp).trim() })
+      return saveRecovery({
+        email: normalizeEmail(email),
+        purpose: 'reset',
+        otpVerified: true,
+      })
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
     }
@@ -116,10 +104,22 @@ export const verifyResetOtp = createAsyncThunk(
 
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
-  async ({ email, resetToken, password }, { rejectWithValue }) => {
+  async ({ email, password }, { rejectWithValue }) => {
     try {
-      await authApi.resetPassword({ email, resetToken, password })
+      await authApi.resetPassword({ email: normalizeEmail(email), newPassword: password })
       recoveryStorage.clear()
+      return true
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error))
+    }
+  },
+)
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ oldPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      await authApi.changePassword({ oldPassword, newPassword })
       return true
     } catch (error) {
       return rejectWithValue(getErrorMessage(error))
@@ -132,9 +132,9 @@ export const resendOtp = createAsyncThunk(
   async ({ email, purpose }, { rejectWithValue }) => {
     try {
       if (purpose === 'reset') {
-        await authApi.forgetPassword({ email })
+        await authApi.forgetPassword({ email: normalizeEmail(email) })
       } else {
-        await authApi.resendOtp({ email })
+        await authApi.resendOtp({ email: normalizeEmail(email) })
       }
       return true
     } catch (error) {
@@ -205,17 +205,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(previewLogin.pending, pending)
-      .addCase(previewLogin.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.error = null
-        state.user = action.payload.user
-        state.accessToken = action.payload.accessToken
-        state.refreshToken = action.payload.refreshToken
-        state.isAuthenticated = true
-        state.recovery = { ...emptyRecovery }
-      })
-      .addCase(previewLogin.rejected, rejected)
       .addCase(login.pending, pending)
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded'
@@ -255,6 +244,12 @@ const authSlice = createSlice({
         state.recovery = { ...emptyRecovery }
       })
       .addCase(resetPassword.rejected, rejected)
+      .addCase(changePassword.pending, pending)
+      .addCase(changePassword.fulfilled, (state) => {
+        state.status = 'succeeded'
+        state.error = null
+      })
+      .addCase(changePassword.rejected, rejected)
       .addCase(resendOtp.pending, (state) => {
         state.resendStatus = 'loading'
         state.resendMessage = ''

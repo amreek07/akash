@@ -22,7 +22,7 @@ export default function ResetPassword() {
     dispatch(clearAuthFeedback())
   }, [dispatch])
 
-  if (!recovery.email || !recovery.resetToken || recovery.purpose !== 'reset') {
+  if (!recovery.email || !recovery.otpVerified || recovery.purpose !== 'reset') {
     return <Navigate to={paths.forgetPassword} replace />
   }
 
@@ -40,7 +40,6 @@ export default function ResetPassword() {
     const result = await dispatch(
       resetPassword({
         email: recovery.email,
-        resetToken: recovery.resetToken,
         password,
       }),
     )

@@ -5,7 +5,7 @@ const ApiError = require("../utils/ApiError");
 const generateAccessToken = (user) => {
   const payload = {
     id: user._id,
-    email: user._email,
+    email: user.email,
   };
 
   return jwt.sign(payload, config.jwt.secret, {

@@ -3,7 +3,7 @@ const RECOVERY_KEY = 'admin.recovery'
 export const emptyRecovery = {
   email: '',
   purpose: 'login',
-  resetToken: '',
+  otpVerified: false,
 }
 
 export const recoveryStorage = {

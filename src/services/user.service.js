@@ -9,13 +9,16 @@ const generateOTP = ()=>{
 }
 
 const createUser = async (userData) => {
-    const user = new User(userData);
+    const user = new User({
+        ...userData,
+        email: userData.email.toLowerCase(),
+    });
     await user.save();
     return user;
 }
 
 const getUserByEmail = async (email) => {
-    return await User.findOne({email:email.toLowerCase()});
+    return await User.findOne({ email: email.toLowerCase() });
 }
 
 const getUserById = async (id) => {
@@ -23,11 +26,15 @@ const getUserById = async (id) => {
 }
 
 const updateUser = async (id, updateData) => {
-    return await User.findByIdAndUpdate(id, updateData, { new: true });
+    const user = await User.findById(id);
+    if (!user) return null;
+    Object.assign(user, updateData);
+    await user.save();
+    return user;
 }
 
 const getUserForOTPVerification = async (email) => {
-    return await User.findOne({ email }).select('+otp +otpExpires');
+    return await User.findOne({ email: email.toLowerCase() }).select('+otp +otpExpires');
 }
 
 module.exports = {

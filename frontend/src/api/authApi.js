@@ -28,6 +28,12 @@ export const authApi = {
   resetPassword(payload) {
     return api.post(endpoints.resetPassword, payload).then(unwrap)
   },
+  changePassword(payload) {
+    return api.post(endpoints.changePassword, payload).then(unwrap)
+  },
+  me() {
+    return api.get(endpoints.me).then(unwrap)
+  },
   logout(payload) {
     return api.post(endpoints.logout, payload).then(unwrap)
   },

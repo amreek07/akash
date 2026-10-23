@@ -1,20 +1,36 @@
+import { useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CategoryForm from '@/components/categories/CategoryForm'
 import { paths } from '@/routes/paths'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { addCategory, updateCategory } from '@/store/slices/categoriesSlice'
+import {
+  clearCategoryFeedback,
+  createCategory,
+  fetchCategoryById,
+  updateCategory,
+} from '@/store/slices/categoriesSlice'
 
 export default function CategoryFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const category = useAppSelector((state) => state.categories.items.find((item) => item.id === id))
+  const { items, current, status, request, error } = useAppSelector((state) => state.categories)
   const isEdit = Boolean(id)
+  const category = items.find((item) => item.id === id) || (current?.id === id ? current : null)
+  const loadingCategory = isEdit && !category && status !== 'failed'
+  const saving = status === 'loading' && (request.startsWith('categories/create') || request.startsWith('categories/update'))
+  const saveError = status === 'failed' && (request.startsWith('categories/create') || request.startsWith('categories/update')) ? error : null
 
-  if (isEdit && !category) {
+  useEffect(() => {
+    dispatch(clearCategoryFeedback())
+    if (isEdit) dispatch(fetchCategoryById(id))
+  }, [dispatch, id, isEdit])
+
+  if (isEdit && !category && !loadingCategory) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-line bg-white p-8 text-center">
         <h2 className="text-xl font-semibold text-heading">This category is not in the catalogue</h2>
+        {error ? <p className="mt-2 text-sm text-muted">{error}</p> : null}
         <Link to={paths.categories} className="mt-4 inline-flex text-sm font-semibold text-logo hover:underline">
           Back to categories
         </Link>
@@ -22,13 +38,23 @@ export default function CategoryFormPage() {
     )
   }
 
-  function handleSubmit(values) {
-    if (isEdit) {
-      dispatch(updateCategory({ ...values, id: category.id }))
-    } else {
-      dispatch(addCategory({ ...values, id: `cat-${Date.now()}` }))
-    }
-    navigate(paths.categories)
+  if (loadingCategory) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-2xl border border-line bg-white p-8 text-center">
+        <h2 className="text-xl font-semibold text-heading">Loading category</h2>
+        <p className="mt-2 text-sm text-muted">Fetching the latest details from the server.</p>
+      </div>
+    )
+  }
+
+  async function handleSubmit(values) {
+    const result = isEdit
+      ? await dispatch(updateCategory({ id: category.id, ...values }))
+      : await dispatch(createCategory(values))
+    const succeeded = isEdit
+      ? updateCategory.fulfilled.match(result)
+      : createCategory.fulfilled.match(result)
+    if (succeeded) navigate(paths.categories)
   }
 
   return (
@@ -50,6 +76,8 @@ export default function CategoryFormPage() {
         key={category?.id || 'new'}
         initialValues={category}
         submitLabel={isEdit ? 'Save changes' : 'Add category'}
+        loading={saving}
+        error={saveError}
         onSubmit={handleSubmit}
       />
     </div>

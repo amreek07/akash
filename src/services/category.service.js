@@ -15,7 +15,8 @@ const createCategory = async (categoryData) => {
 };
 
 const getAllCategories = async (filter ={}, options ={}) => {
-    const { limit = 10, page = 1 } = options;
+    const page = Math.max(1, Number(options.page) || 1);
+    const limit = Math.max(1, Number(options.limit) || 50);
     const skip = (page - 1) * limit;
     const query = filter.search ? { name: { $regex: filter.search, $options: 'i' } } : {};
     const categories = await Category.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
@@ -37,6 +38,9 @@ const getCategoryById = async (id) => {
         throw new ApiError(400, "Invalid category ID");
     }
     const category = await Category.findById(id);
+    if (!category) {
+        throw new ApiError(404, "Category not found");
+    }
     return category;
 };
 
@@ -49,6 +53,9 @@ const updateCategory = async (id, categoryData) => {
         throw new ApiError(400, "Category already exists");
     }
     const category = await Category.findByIdAndUpdate(id, categoryData, { new: true });
+    if (!category) {
+        throw new ApiError(404, "Category not found");
+    }
     return category;
 };
 
@@ -56,7 +63,10 @@ const deleteCategory = async (id) => {
     if (!isValidObjectId(id)) {
         throw new ApiError(400, "Invalid category ID");
     }
-    await Category.findByIdAndDelete(id);
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) {
+        throw new ApiError(404, "Category not found");
+    }
 };
 
 const categoryStatusToggle = async (id) => {
@@ -64,6 +74,9 @@ const categoryStatusToggle = async (id) => {
         throw new ApiError(400, "Invalid category ID");
     }
     const category = await Category.findById(id);
+    if (!category) {
+        throw new ApiError(404, "Category not found");
+    }
     category.isActive = !category.isActive;
     await category.save();
     return category;

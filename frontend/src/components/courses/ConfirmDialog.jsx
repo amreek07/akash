@@ -1,6 +1,6 @@
 import Button from '@/components/common/Button'
 
-export default function ConfirmDialog({ title, description, confirmLabel = 'Remove', onConfirm, onClose }) {
+export default function ConfirmDialog({ title, description, confirmLabel = 'Remove', onConfirm, onClose, loading = false }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-heading/40 px-4">
       <div
@@ -14,10 +14,10 @@ export default function ConfirmDialog({ title, description, confirmLabel = 'Remo
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
         <div className="mt-6 flex justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={onConfirm}>
+          <Button variant="danger" onClick={onConfirm} loading={loading}>
             {confirmLabel}
           </Button>
         </div>

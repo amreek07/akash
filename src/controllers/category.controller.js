@@ -8,7 +8,11 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const getAllCategories = asyncHandler(async (req, res) => {
-    const {categories, pagination} = await categoryService.getAllCategories(req.query, req.options);
+    const { search, page, limit } = req.query;
+    const { categories, pagination } = await categoryService.getAllCategories(
+        { search },
+        { page: Number(page) || 1, limit: Number(limit) || 50 },
+    );
     res.status(200).json(new ApiResponse(200, { categories, pagination }, "Categories fetched successfully"));
 });
 
