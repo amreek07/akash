@@ -5,3 +5,4 @@ module.exports.categoryService = require('./category.service');
 module.exports.courseService = require('./course.service');
 module.exports.responseService = require('./response.service');
 module.exports.footerService = require('./footer.service');
+module.exports.galleryService = require('./gallery.service');

@@ -151,3 +151,7 @@ vite.config.ts.timestamp-*
 # Uploaded avatars
 public/uploads/avatars/*
 !public/uploads/avatars/.gitkeep
+
+# Uploaded gallery images
+public/uploads/gallery/*
+!public/uploads/gallery/.gitkeep
