@@ -3,9 +3,10 @@ import authReducer, { clearSession, updateTokens } from '@/store/slices/authSlic
 import categoriesReducer from '@/store/slices/categoriesSlice'
 import coursesReducer from '@/store/slices/coursesSlice'
 import contentReducer, { saveContentPreview } from '@/store/slices/contentSlice'
-import partnersReducer, { savePartnersPreview } from '@/store/slices/partnersSlice'
+import partnersReducer from '@/store/slices/partnersSlice'
 import responsesReducer from '@/store/slices/responsesSlice'
 import notificationsReducer from '@/store/slices/notificationsSlice'
+import dashboardReducer from '@/store/slices/dashboardSlice'
 import { bindAuthHandlers } from '@/api/axiosInstance'
 
 export const store = configureStore({
@@ -17,11 +18,11 @@ export const store = configureStore({
     content: contentReducer,
     responses: responsesReducer,
     notifications: notificationsReducer,
+    dashboard: dashboardReducer,
   },
 })
 
 store.subscribe(() => {
-  savePartnersPreview(store.getState().partners)
   saveContentPreview(store.getState().content)
 })
 

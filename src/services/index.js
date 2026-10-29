@@ -7,3 +7,5 @@ module.exports.responseService = require('./response.service');
 module.exports.footerService = require('./footer.service');
 module.exports.galleryService = require('./gallery.service');
 module.exports.notificationService = require('./notification.service');
+module.exports.partnerService = require('./partner.service');
+module.exports.dashboardService = require('./dashboard.service');

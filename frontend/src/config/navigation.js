@@ -23,7 +23,7 @@ export const adminNavigation = [
     label: 'Partners',
     to: paths.partners,
     icon: 'partners',
-    description: 'Institute partners',
+    description: 'Partner people',
   },
   {
     label: 'Responses',

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import TextField from '@/components/common/TextField'
 import { paths } from '@/routes/paths'
@@ -8,29 +9,42 @@ import { validateEmail } from '@/utils/validators'
 const emptyValues = {
   name: '',
   email: '',
-  partnerSince: '',
   phone: '',
+  address: '',
+  city: '',
   partnerId: '',
+  status: 'active',
   isActive: true,
 }
 
 function validatePhone(value) {
   const phone = value.trim()
   if (!phone) return 'Phone is required.'
-  if (!/^[0-9+\-\s()]{7,15}$/.test(phone)) return 'Enter a valid phone number.'
+  if (!/^[0-9+\-\s()]{7,20}$/.test(phone)) return 'Enter a valid phone number.'
   return ''
 }
 
-export default function PartnerForm({ initialValues, submitLabel, onSubmit }) {
+export default function PartnerForm({ initialValues, submitLabel, onSubmit, loading = false, error }) {
   const [values, setValues] = useState(() => ({
     ...emptyValues,
     ...initialValues,
+    status: initialValues?.status || (initialValues?.isActive === false ? 'inactive' : 'active'),
+    isActive: initialValues ? initialValues.isActive !== false && initialValues.status !== 'inactive' : true,
   }))
   const [errors, setErrors] = useState({})
+  const isActive = values.status === 'active'
 
   function update(field, value) {
     setValues((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: '' }))
+  }
+
+  function setStatus(nextStatus) {
+    setValues((current) => ({
+      ...current,
+      status: nextStatus,
+      isActive: nextStatus === 'active',
+    }))
   }
 
   function handleSubmit(event) {
@@ -38,9 +52,9 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit }) {
     const nextErrors = {
       name: values.name.trim() ? '' : 'Name is required.',
       email: validateEmail(values.email),
-      partnerSince: values.partnerSince ? '' : 'Partner since date is required.',
       phone: validatePhone(values.phone),
-      partnerId: values.partnerId.trim() ? '' : 'Partner ID is required.',
+      address: values.address.trim() ? '' : 'Address is required.',
+      city: values.city.trim() ? '' : 'City is required.',
     }
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
@@ -48,31 +62,32 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit }) {
     onSubmit({
       name: values.name.trim(),
       email: values.email.trim(),
-      partnerSince: values.partnerSince,
       phone: values.phone.trim(),
-      partnerId: values.partnerId.trim(),
-      isActive: values.isActive,
+      address: values.address.trim(),
+      city: values.city.trim(),
+      status: values.status,
+      isActive: values.status === 'active',
     })
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5 rounded-2xl border border-line bg-white p-5 sm:p-6">
+      {error ? <Alert>{error}</Alert> : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <TextField
           label="Name"
           name="name"
           value={values.name}
           error={errors.name}
-          placeholder="Punjab University"
+          placeholder="Rahul Verma"
           onChange={(event) => update('name', event.target.value)}
         />
         <TextField
           label="Partner ID"
           name="partnerId"
-          value={values.partnerId}
-          error={errors.partnerId}
-          placeholder="PU-2018"
-          onChange={(event) => update('partnerId', event.target.value)}
+          value={values.partnerId || 'Assigned on save'}
+          readOnly
+          hint="CHI-P-year-count, for example CHI-P-2026-001."
         />
         <TextField
           label="Email"
@@ -92,32 +107,44 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit }) {
           placeholder="9876543210"
           onChange={(event) => update('phone', event.target.value)}
         />
+        <div className="sm:col-span-2">
+          <TextField
+            label="Address"
+            name="address"
+            value={values.address}
+            error={errors.address}
+            placeholder="House number, street, area"
+            onChange={(event) => update('address', event.target.value)}
+          />
+        </div>
         <TextField
-          label="Partner since"
-          name="partnerSince"
-          type="date"
-          value={values.partnerSince}
-          error={errors.partnerSince}
-          onChange={(event) => update('partnerSince', event.target.value)}
+          label="City"
+          name="city"
+          value={values.city}
+          error={errors.city}
+          placeholder="Ludhiana"
+          onChange={(event) => update('city', event.target.value)}
         />
       </div>
 
       <section className="flex items-center justify-between gap-4 rounded-xl border border-line bg-surface px-4 py-3">
         <div>
           <p className="text-sm font-semibold text-heading">Status</p>
-          <p className="mt-1 text-sm text-muted">Inactive partners stay listed and show as off.</p>
+          <p className="mt-1 text-sm text-muted">
+            {isActive ? 'This partner is active.' : 'This partner is inactive and stays on the list.'}
+          </p>
         </div>
         <button
           type="button"
           role="switch"
-          aria-checked={values.isActive}
+          aria-checked={isActive}
           aria-label="Active"
-          onClick={() => update('isActive', !values.isActive)}
-          className={`relative h-7 w-12 shrink-0 rounded-full transition ${values.isActive ? 'bg-primary' : 'bg-line'}`}
+          onClick={() => setStatus(isActive ? 'inactive' : 'active')}
+          className={`relative h-7 w-12 shrink-0 rounded-full transition ${isActive ? 'bg-primary' : 'bg-line'}`}
         >
           <span
             className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
-              values.isActive ? 'translate-x-5' : 'translate-x-0'
+              isActive ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
         </button>
@@ -130,7 +157,9 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit }) {
         >
           Cancel
         </Link>
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" loading={loading}>
+          {submitLabel}
+        </Button>
       </div>
     </form>
   )

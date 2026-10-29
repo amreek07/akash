@@ -5,3 +5,4 @@ module.exports.responseValidation = require('./response.validate');
 module.exports.footerValidation = require('./footer.validation');
 module.exports.galleryValidation = require('./gallery.validation');
 module.exports.notificationValidation = require('./notification.validation');
+module.exports.partnerValidation = require('./partner.validation');

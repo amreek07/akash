@@ -1,44 +1,40 @@
 import { useEffect } from 'react'
 import EnrollmentChart from '@/components/dashboard/EnrollmentChart'
+import Alert from '@/components/common/Alert'
 import Icon from '@/components/common/Icon'
-import { enrollmentMonths, institutePartners } from '@/constants/dashboard'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { fetchResponses } from '@/store/slices/responsesSlice'
+import { fetchDashboard } from '@/store/slices/dashboardSlice'
 import { firstName } from '@/utils/format'
 
 export default function Dashboard() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth.user)
-  const courses = useAppSelector((state) => state.courses.items)
-  const registrationCount = useAppSelector((state) => state.responses.counts.registration)
+  const { stats, status, error } = useAppSelector((state) => state.dashboard)
   const name = user?.fullName || 'Administrator'
-  const newRegistrations = registrationCount
 
   useEffect(() => {
-    dispatch(fetchResponses({ responseType: 'registration', page: 1, limit: 1 }))
+    dispatch(fetchDashboard())
   }, [dispatch])
-  const activeCourses = courses.filter((course) => course.isActive).length
-  const activePartners = institutePartners.filter((partner) => partner.active).length
 
-  const stats = [
+  const statsCards = [
     {
-      label: 'New registrations',
-      value: newRegistrations,
-      detail: 'Waiting in the responses inbox',
+      label: 'Registrations',
+      value: stats.registrations,
+      detail: 'Responses with type registration',
       icon: 'inbox',
       tone: 'bg-logo/10 text-logo',
     },
     {
-      label: 'Total active courses',
-      value: activeCourses,
-      detail: `${courses.length} courses in the catalogue`,
+      label: 'Active courses',
+      value: stats.courses.active,
+      detail: `${stats.courses.total} courses in the catalogue`,
       icon: 'courses',
       tone: 'bg-primary/10 text-primary',
     },
     {
       label: 'Active partners',
-      value: activePartners,
-      detail: `${institutePartners.length} partner relationships`,
+      value: stats.partners.active,
+      detail: `${stats.partners.total} people in the partner list`,
       icon: 'user',
       tone: 'bg-gold/25 text-heading',
     },
@@ -66,8 +62,10 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {status === 'failed' && error ? <Alert>{error}</Alert> : null}
+
       <section className="grid gap-4 md:grid-cols-3">
-        {stats.map((stat) => (
+        {statsCards.map((stat) => (
           <article key={stat.label} className="rounded-2xl border border-line bg-white p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{stat.label}</p>
@@ -81,7 +79,7 @@ export default function Dashboard() {
         ))}
       </section>
 
-      <EnrollmentChart months={enrollmentMonths} />
+      <EnrollmentChart year={stats.year} months={stats.months} />
 
       <section className="rounded-2xl border border-gold/40 bg-gold/15 px-5 py-4">
         <h3 className="text-sm font-semibold text-heading">Access recovery</h3>

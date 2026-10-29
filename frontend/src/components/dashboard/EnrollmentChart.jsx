@@ -1,29 +1,38 @@
-export default function EnrollmentChart({ months }) {
-  const width = 640
-  const height = 240
-  const pad = { top: 24, right: 8, bottom: 32, left: 40 }
+const series = [
+  { key: 'registration', label: 'Registration', color: '#1c4dfb' },
+  { key: 'enquiry', label: 'Enquiry', color: '#11a22f' },
+  { key: 'general', label: 'General', color: '#f9bd01' },
+]
+
+export default function EnrollmentChart({ year, months = [] }) {
+  const width = 720
+  const height = 260
+  const pad = { top: 28, right: 8, bottom: 32, left: 36 }
   const innerW = width - pad.left - pad.right
   const innerH = height - pad.top - pad.bottom
-  const max = Math.max(...months.map((month) => month.students), 1)
-  const gap = 18
-  const barWidth = (innerW - gap * (months.length - 1)) / months.length
+  const max = Math.max(...months.map((month) => month.total || 0), 1)
+  const gap = 10
+  const barWidth = months.length ? (innerW - gap * (months.length - 1)) / months.length : 0
   const ticks = [0, 0.5, 1]
+  const yearTotal = months.reduce((sum, month) => sum + (month.total || 0), 0)
 
   return (
     <section className="rounded-2xl border border-line bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Enrollment</p>
-          <h3 className="mt-1 text-lg font-semibold text-heading">Student enrollment</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Responses</p>
+          <h3 className="mt-1 text-lg font-semibold text-heading">Responses through the year</h3>
         </div>
-        <p className="text-sm text-muted">May – October</p>
+        <p className="text-sm text-muted">
+          Jan – Dec {year} · {yearTotal} total
+        </p>
       </div>
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="mt-4 w-full"
         role="img"
-        aria-label="Bar chart of student enrollment from May to October"
+        aria-label={`Stacked bar chart of registration, enquiry, and general responses for each month of ${year}`}
       >
         {ticks.map((tick) => {
           const y = pad.top + innerH - tick * innerH
@@ -39,23 +48,46 @@ export default function EnrollmentChart({ months }) {
         })}
 
         {months.map((month, index) => {
-          const barHeight = (month.students / max) * innerH
           const x = pad.left + index * (barWidth + gap)
-          const y = pad.top + innerH - barHeight
-          const current = index === months.length - 1
+          let stacked = 0
           return (
             <g key={month.label}>
-              <rect x={x} y={y} width={barWidth} height={barHeight} rx="6" fill={current ? '#f9bd01' : '#1c4dfb'} />
-              <text x={x + barWidth / 2} y={y - 8} textAnchor="middle" fill="#151b24" fontSize="12" fontWeight="600">
-                {month.students}
-              </text>
-              <text x={x + barWidth / 2} y={height - 8} textAnchor="middle" fill="#555f69" fontSize="12">
+              {series.map((item) => {
+                const value = Number(month[item.key]) || 0
+                const barHeight = (value / max) * innerH
+                const y = pad.top + innerH - stacked - barHeight
+                stacked += barHeight
+                if (barHeight <= 0) return null
+                return <rect key={item.key} x={x} y={y} width={barWidth} height={barHeight} fill={item.color} />
+              })}
+              {month.total > 0 ? (
+                <text
+                  x={x + barWidth / 2}
+                  y={pad.top + innerH - (month.total / max) * innerH - 8}
+                  textAnchor="middle"
+                  fill="#151b24"
+                  fontSize="11"
+                  fontWeight="600"
+                >
+                  {month.total}
+                </text>
+              ) : null}
+              <text x={x + barWidth / 2} y={height - 8} textAnchor="middle" fill="#555f69" fontSize="11">
                 {month.label}
               </text>
             </g>
           )
         })}
       </svg>
+
+      <ul className="mt-2 flex flex-wrap gap-4">
+        {series.map((item) => (
+          <li key={item.key} className="inline-flex items-center gap-2 text-xs font-semibold text-muted">
+            <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: item.color }} />
+            {item.label}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
