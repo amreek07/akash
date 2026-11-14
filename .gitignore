@@ -153,4 +153,5 @@ public/uploads/avatars/*
 # Uploaded gallery images
 public/uploads/gallery/*
 !public/uploads/gallery/.gitkeep
+
 config.bat
