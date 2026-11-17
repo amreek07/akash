@@ -8,4 +8,5 @@ module.exports.footerService = require('./footer.service');
 module.exports.galleryService = require('./gallery.service');
 module.exports.notificationService = require('./notification.service');
 module.exports.partnerService = require('./partner.service');
+module.exports.studentService = require('./student.service');
 module.exports.dashboardService = require('./dashboard.service');

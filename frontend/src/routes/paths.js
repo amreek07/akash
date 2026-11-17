@@ -15,6 +15,10 @@ export const paths = {
   partners: '/partners',
   partnerNew: '/partners/new',
   partnerEdit: (id) => `/partners/${id}/edit`,
+  students: '/students',
+  studentNew: '/students/new',
+  studentDetails: (id) => `/students/${id}`,
+  studentEdit: (id) => `/students/${id}/edit`,
   profile: '/profile',
   profileEdit: '/profile/edit',
   changePassword: '/profile/change-password',
@@ -42,6 +46,8 @@ export const pageTitles = {
   [paths.categoryNew]: 'Add category',
   [paths.partners]: 'Partners',
   [paths.partnerNew]: 'Add partner',
+  [paths.students]: 'Students',
+  [paths.studentNew]: 'Add student',
   [paths.profile]: 'Profile',
   [paths.profileEdit]: 'Edit profile',
   [paths.changePassword]: 'Change password',
@@ -63,6 +69,8 @@ export function resolvePageTitle(pathname) {
   if (/^\/courses\/[^/]+$/.test(pathname)) return 'Course details'
   if (/^\/categories\/[^/]+\/edit$/.test(pathname)) return 'Edit category'
   if (/^\/partners\/[^/]+\/edit$/.test(pathname)) return 'Edit partner'
+  if (/^\/students\/[^/]+\/edit$/.test(pathname)) return 'Edit student'
+  if (/^\/students\/[^/]+$/.test(pathname)) return 'Student details'
   if (/^\/responses\/(registrations|enquiries|general)\/[^/]+$/.test(pathname)) return 'Response details'
   if (/^\/content\/gallery\/[^/]+\/edit$/.test(pathname)) return 'Edit image'
   return 'Coding Hubs Institute'

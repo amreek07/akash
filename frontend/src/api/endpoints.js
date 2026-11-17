@@ -26,5 +26,7 @@ export const endpoints = {
   notificationsReadAll: '/notification/read-all',
   partners: '/partner',
   partner: (id) => `/partner/${id}`,
+  students: '/student',
+  student: (id) => `/student/${id}`,
   dashboard: '/dashboard',
 }

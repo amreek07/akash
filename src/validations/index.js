@@ -6,3 +6,4 @@ module.exports.footerValidation = require('./footer.validation');
 module.exports.galleryValidation = require('./gallery.validation');
 module.exports.notificationValidation = require('./notification.validation');
 module.exports.partnerValidation = require('./partner.validation');
+module.exports.studentValidation = require('./student.validation');

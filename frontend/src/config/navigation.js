@@ -26,6 +26,12 @@ export const adminNavigation = [
     description: 'Partner people',
   },
   {
+    label: 'Students',
+    to: paths.students,
+    icon: 'students',
+    description: 'Enrolled students',
+  },
+  {
     label: 'Responses',
     to: '/responses',
     icon: 'inbox',
