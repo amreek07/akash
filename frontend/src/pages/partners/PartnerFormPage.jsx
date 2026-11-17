@@ -66,8 +66,8 @@ export default function PartnerFormPage() {
         {isEdit ? 'Edit partner' : 'Add partner'}
       </h2>
       <p className="mt-1 mb-6 text-sm text-muted">
-        A partner is a person. Name, contact details, address, and status are saved here. The partner ID is generated
-        as CHI-P-year-count.
+        A partner is a person. Name, contact details, address, the date they became a partner, and status are saved
+        here. The partner ID is generated as CHI-P-year-count.
       </p>
       <PartnerForm
         key={partner?.id || 'new'}

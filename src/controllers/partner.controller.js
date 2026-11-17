@@ -13,6 +13,7 @@ function toPartner(partner) {
         phone: data.phone || '',
         address: data.address || '',
         city: data.city || '',
+        partnerSince: data.partnerSince || null,
         status,
         isActive: status === 'active',
         createdAt: data.createdAt || null,

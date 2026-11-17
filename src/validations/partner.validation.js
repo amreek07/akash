@@ -6,6 +6,9 @@ const partnerBody = {
     phone: Joi.string().trim().min(7).max(20).required(),
     address: Joi.string().trim().min(1).required(),
     city: Joi.string().trim().min(1).required(),
+    partnerSince: Joi.date().max('now').required().messages({
+        'date.max': 'Partner since cannot be in the future',
+    }),
     isActive: Joi.boolean().optional(),
     status: Joi.string().valid('active', 'inactive').optional(),
 };
