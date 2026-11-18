@@ -28,6 +28,7 @@ export function toPartner(item) {
     phone: item.phone || '',
     address: item.address || '',
     city: item.city || '',
+    partnerSince: item.partnerSince || '',
     status,
     isActive: status === 'active',
     createdAt: item.createdAt || null,

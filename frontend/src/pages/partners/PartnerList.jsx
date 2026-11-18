@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/courses/ConfirmDialog'
 import { paths } from '@/routes/paths'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { clearPartnerFeedback, deletePartner, fetchPartners } from '@/store/slices/partnersSlice'
+import { formatDate } from '@/utils/format'
 
 const PAGE_SIZE = 50
 
@@ -80,7 +81,7 @@ export default function PartnerList() {
           </div>
         ) : items.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-[1100px] text-left text-sm">
               <thead className="bg-surface text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Name</th>
@@ -88,6 +89,7 @@ export default function PartnerList() {
                   <th className="px-4 py-3 font-semibold">Email</th>
                   <th className="px-4 py-3 font-semibold">Phone</th>
                   <th className="px-4 py-3 font-semibold">City</th>
+                  <th className="px-4 py-3 font-semibold">Partner since</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
                   <th className="px-5 py-3 text-right font-semibold">Actions</th>
                 </tr>
@@ -104,6 +106,7 @@ export default function PartnerList() {
                     <td className="px-4 py-4 text-muted">{partner.email}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-heading">{partner.phone}</td>
                     <td className="px-4 py-4 text-heading">{partner.city}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-heading">{formatDate(partner.partnerSince)}</td>
                     <td className="px-4 py-4">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${

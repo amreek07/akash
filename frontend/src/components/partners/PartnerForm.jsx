@@ -4,6 +4,7 @@ import Alert from '@/components/common/Alert'
 import Button from '@/components/common/Button'
 import TextField from '@/components/common/TextField'
 import { paths } from '@/routes/paths'
+import { toDateInput } from '@/utils/format'
 import { validateEmail } from '@/utils/validators'
 
 const emptyValues = {
@@ -12,6 +13,7 @@ const emptyValues = {
   phone: '',
   address: '',
   city: '',
+  partnerSince: '',
   partnerId: '',
   status: 'active',
   isActive: true,
@@ -28,6 +30,7 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit, load
   const [values, setValues] = useState(() => ({
     ...emptyValues,
     ...initialValues,
+    partnerSince: toDateInput(initialValues?.partnerSince),
     status: initialValues?.status || (initialValues?.isActive === false ? 'inactive' : 'active'),
     isActive: initialValues ? initialValues.isActive !== false && initialValues.status !== 'inactive' : true,
   }))
@@ -55,6 +58,11 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit, load
       phone: validatePhone(values.phone),
       address: values.address.trim() ? '' : 'Address is required.',
       city: values.city.trim() ? '' : 'City is required.',
+      partnerSince: !values.partnerSince
+        ? 'Partner since is required.'
+        : values.partnerSince > toDateInput(new Date())
+          ? 'Partner since cannot be in the future.'
+          : '',
     }
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) return
@@ -65,6 +73,7 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit, load
       phone: values.phone.trim(),
       address: values.address.trim(),
       city: values.city.trim(),
+      partnerSince: values.partnerSince,
       status: values.status,
       isActive: values.status === 'active',
     })
@@ -124,6 +133,16 @@ export default function PartnerForm({ initialValues, submitLabel, onSubmit, load
           error={errors.city}
           placeholder="Ludhiana"
           onChange={(event) => update('city', event.target.value)}
+        />
+        <TextField
+          label="Partner since"
+          name="partnerSince"
+          type="date"
+          value={values.partnerSince}
+          error={errors.partnerSince}
+          max={toDateInput(new Date())}
+          hint="The date this person became a partner."
+          onChange={(event) => update('partnerSince', event.target.value)}
         />
       </div>
 

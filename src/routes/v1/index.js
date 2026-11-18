@@ -7,6 +7,7 @@ const footerRoutes = require('./footer.route');
 const galleryRoutes = require('./gallery.route');
 const notificationRoutes = require('./notification.route');
 const partnerRoutes = require('./partner.route');
+const studentRoutes = require('./student.route');
 const dashboardRoutes = require('./dashboard.route');
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.use('/footer', footerRoutes);
 router.use('/gallery', galleryRoutes);
 router.use('/notification', notificationRoutes);
 router.use('/partner', partnerRoutes);
+router.use('/student', studentRoutes);
 router.use('/dashboard', dashboardRoutes);
 
 module.exports = router;

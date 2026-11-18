@@ -42,6 +42,7 @@ const createPartner = async (payload) => {
         phone: String(payload.phone || '').trim(),
         address: String(payload.address || '').trim(),
         city: String(payload.city || '').trim(),
+        partnerSince: new Date(payload.partnerSince),
         ...flags,
     });
     if (!partner) {
@@ -126,6 +127,7 @@ const updatePartner = async (id, payload) => {
             phone: String(payload.phone || '').trim(),
             address: String(payload.address || '').trim(),
             city: String(payload.city || '').trim(),
+            partnerSince: new Date(payload.partnerSince),
             ...flags,
         },
         { new: true },

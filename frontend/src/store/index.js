@@ -4,6 +4,7 @@ import categoriesReducer from '@/store/slices/categoriesSlice'
 import coursesReducer from '@/store/slices/coursesSlice'
 import contentReducer, { saveContentPreview } from '@/store/slices/contentSlice'
 import partnersReducer from '@/store/slices/partnersSlice'
+import studentsReducer from '@/store/slices/studentsSlice'
 import responsesReducer from '@/store/slices/responsesSlice'
 import notificationsReducer from '@/store/slices/notificationsSlice'
 import dashboardReducer from '@/store/slices/dashboardSlice'
@@ -15,6 +16,7 @@ export const store = configureStore({
     courses: coursesReducer,
     categories: categoriesReducer,
     partners: partnersReducer,
+    students: studentsReducer,
     content: contentReducer,
     responses: responsesReducer,
     notifications: notificationsReducer,

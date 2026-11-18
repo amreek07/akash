@@ -35,6 +35,10 @@ const partnerSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        partnerSince: {
+            type: Date,
+            required: true,
+        },
         isActive: {
             type: Boolean,
             default: true,

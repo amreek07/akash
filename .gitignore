@@ -155,3 +155,4 @@ public/uploads/gallery/*
 !public/uploads/gallery/.gitkeep
 
 .env
+.env*
